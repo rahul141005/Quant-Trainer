@@ -25,7 +25,7 @@ var NotificationManager = (function () {
     { title: '🏆 Challenge Yourself', body: 'Try the timed test mode and beat your best score.' },
     { title: '✨ Stay Consistent', body: 'Your quant reflex improves with daily practice.' },
     { title: '📈 Build Your Percentile', body: 'Today\'s 5 drills build tomorrow\'s CAT percentile.' },
-    { title: '🔢 Numbers Reward Consistency', body: 'Numbers reward consistency. Open the app and prove it.' },
+    { title: '🔢 Numbers Reward Consistency', body: 'Practice daily and watch your scores climb higher.' },
     { title: '📱 Your Streak is Waiting', body: 'Your daily math streak is waiting.' },
     { title: '🎯 Ready for Another?', body: 'Ready for another quick challenge?' }
   ];

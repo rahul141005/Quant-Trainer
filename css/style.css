@@ -1609,11 +1609,10 @@ body.numpad-active {
 
 /* ---- Native App Feel Enhancements ---- */
 
-/* Prevent image dragging throughout the app */
-img, svg {
+/* Prevent image dragging throughout the app (decorative images only) */
+img {
   -webkit-user-drag: none;
   user-drag: none;
-  pointer-events: none;
 }
 
 /* Ripple effect for interactive elements */

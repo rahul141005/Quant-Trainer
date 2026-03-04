@@ -70,7 +70,7 @@ document.addEventListener('dragstart', function (e) {
     setTimeout(function () {
       if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
     }, 500);
-  }, { passive: true });
+  });
 })();
 
 /* ---- Haptic feedback utility ---- */
@@ -90,21 +90,21 @@ function triggerHaptic(pattern) {
     if (!btn) return;
     btn.classList.add('pressed');
     triggerHaptic(8);
-  }, { passive: true });
+  });
 
-  document.addEventListener('pointerup', function (e) {
+  document.addEventListener('pointerup', function () {
     var pressed = document.querySelectorAll('.numpad-btn.pressed');
     for (var i = 0; i < pressed.length; i++) {
       pressed[i].classList.remove('pressed');
     }
-  }, { passive: true });
+  });
 
   document.addEventListener('pointercancel', function () {
     var pressed = document.querySelectorAll('.numpad-btn.pressed');
     for (var i = 0; i < pressed.length; i++) {
       pressed[i].classList.remove('pressed');
     }
-  }, { passive: true });
+  });
 })();
 
 /* ---- Global error handling for unhandled promise rejections ---- */
