@@ -67,12 +67,15 @@ header h1 {
 
 /* ---- Cards ---- */
 .card {
-  background: #ffffff;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
-  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+  border: 1px solid rgba(226,232,240,.6);
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 .card:active {
   transform: scale(.985);
@@ -87,16 +90,19 @@ header h1 {
 
 /* ---- Study Cards (Home page) ---- */
 .study-card {
-  background: #ffffff;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 1rem;
   padding: 1.25rem;
   margin-bottom: .85rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+  border: 1px solid rgba(226,232,240,.6);
   display: block;
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
-.study-card:active { transform: scale(.97); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.study-card:active { transform: scale(.97); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 .study-card h3 {
   font-size: 1.05rem;
   color: #0f172a;
@@ -124,7 +130,7 @@ header h1 {
   margin-top: .6rem;
   background: #e2e8f0;
   color: #0f172a;
-  transition: background .2s, transform .15s, box-shadow .15s;
+  transition: background .2s ease, transform .12s ease, box-shadow .2s ease;
 }
 .btn:active { transform: scale(.95); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
 .btn.accent {
@@ -147,7 +153,7 @@ header h1 {
   text-align: center;
   outline: none;
   margin: .75rem 0;
-  transition: border-color .2s, box-shadow .2s;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 .input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
 
@@ -435,21 +441,24 @@ header h1 {
   gap: .75rem;
 }
 .table-card {
-  background: #f8fafc;
+  background: rgba(248,250,252,.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 1rem;
-  padding: .75rem;
-  border: 1px solid #e2e8f0;
+  padding: .85rem;
+  border: 1px solid rgba(226,232,240,.7);
   min-width: 0;
   overflow: hidden;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 .table-card:active {
   transform: scale(.97);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 .table-title {
-  font-size: .9rem;
+  font-size: .92rem;
   font-weight: 700;
   color: #2563eb;
   margin-bottom: .5rem;
@@ -463,19 +472,20 @@ header h1 {
   table-layout: auto;
 }
 .table-card .math-table td {
-  font-size: .75rem;
-  padding: .15rem .25rem;
+  font-size: .82rem;
+  padding: .18rem .3rem;
   white-space: nowrap;
-  text-align: left;
+  text-align: right;
   border-bottom: none;
+  font-variant-numeric: tabular-nums;
 }
 @media (max-width: 320px) {
   .tables-container {
     grid-template-columns: 1fr;
   }
   .table-card .math-table td {
-    font-size: .78rem;
-    padding: .2rem .3rem;
+    font-size: .84rem;
+    padding: .2rem .35rem;
   }
 }
 
@@ -570,16 +580,19 @@ header h1 {
 
 /* ---- Mode Cards (Practice page) ---- */
 .mode-card {
-  background: #ffffff;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 1rem;
   padding: 1.25rem;
   margin-bottom: .85rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+  border: 1px solid rgba(226,232,240,.6);
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
+  transition: transform .15s ease, box-shadow .15s ease;
   min-height: 48px;
 }
-.mode-card:active { transform: scale(.97); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.mode-card:active { transform: scale(.97); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 .mode-card h3 {
   font-size: 1.05rem;
   color: #0f172a;
@@ -748,7 +761,8 @@ body.dark-mode {
 body.dark-mode .card,
 body.dark-mode .study-card,
 body.dark-mode .mode-card {
-  background: #1e293b;
+  background: rgba(30,41,59,.88);
+  border-color: rgba(51,65,85,.6);
   box-shadow: 0 2px 12px rgba(0,0,0,.3);
 }
 body.dark-mode .bottom-nav {
@@ -790,8 +804,8 @@ body.dark-mode .study-card p,
 body.dark-mode .mode-card p,
 body.dark-mode .settings-label p { color: #94a3b8; }
 body.dark-mode .table-card {
-  background: #1e293b;
-  border-color: #334155;
+  background: rgba(30,41,59,.85);
+  border-color: rgba(51,65,85,.7);
 }
 body.dark-mode .table-card .table-title {
   border-bottom-color: #334155;
@@ -927,6 +941,11 @@ body.dark-mode .learn-jump-btn:active {
   justify-content: center;
   z-index: 200;
   padding: 1rem;
+  animation: modalOverlayFadeIn .2s ease;
+}
+@keyframes modalOverlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .modal-content {
   background: #ffffff;
@@ -937,6 +956,11 @@ body.dark-mode .learn-jump-btn:active {
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 4px 24px rgba(0,0,0,.15);
+  animation: modalContentScaleIn .2s ease;
+}
+@keyframes modalContentScaleIn {
+  from { transform: scale(.94); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }
 .modal-title {
   font-size: 1.1rem;
@@ -1012,6 +1036,115 @@ body.dark-mode .modal-input { background: #334155; border-color: #475569; color:
 body.dark-mode .modal-title { color: #60a5fa; }
 body.dark-mode .modal-cancel { background: #334155; color: #e2e8f0; }
 body.dark-mode mark.search-highlight { background: #854d0e; color: #fef08a; }
+
+/* ---- Table Expansion Modal ---- */
+.table-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  padding: 1rem;
+  opacity: 0;
+  animation: tableModalFadeIn .25s ease forwards;
+}
+.table-modal-overlay.closing {
+  animation: tableModalFadeOut .2s ease forwards;
+}
+@keyframes tableModalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes tableModalFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.table-modal-content {
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 1.25rem;
+  padding: 1.75rem 1.5rem;
+  width: 100%;
+  max-width: 340px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  border: 1px solid rgba(226,232,240,.6);
+  position: relative;
+  transform: scale(.92);
+  animation: tableModalScaleIn .25s ease forwards;
+}
+.table-modal-overlay.closing .table-modal-content {
+  animation: tableModalScaleOut .2s ease forwards;
+}
+@keyframes tableModalScaleIn {
+  from { transform: scale(.92); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes tableModalScaleOut {
+  from { transform: scale(1); opacity: 1; }
+  to   { transform: scale(.92); opacity: 0; }
+}
+.table-modal-close {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: rgba(0,0,0,.06);
+  border-radius: 50%;
+  font-size: 1rem;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .12s;
+  line-height: 1;
+}
+.table-modal-close:active {
+  transform: scale(.9);
+  background: rgba(0,0,0,.1);
+}
+.table-modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: .75rem;
+  text-align: center;
+}
+.table-modal-content .math-table {
+  width: auto;
+  margin: 0 auto;
+}
+.table-modal-content .math-table td {
+  font-size: 1.1rem;
+  padding: .35rem .5rem;
+  white-space: nowrap;
+  text-align: right;
+  border-bottom: none;
+  font-variant-numeric: tabular-nums;
+}
+body.dark-mode .table-modal-overlay {
+  background: rgba(0,0,0,.6);
+}
+body.dark-mode .table-modal-content {
+  background: rgba(30,41,59,.95);
+  border-color: rgba(51,65,85,.7);
+}
+body.dark-mode .table-modal-close {
+  background: rgba(255,255,255,.08);
+  color: #94a3b8;
+}
+body.dark-mode .table-modal-title {
+  color: #60a5fa;
+}
 
 /* ---- Responsive ---- */
 @media (min-width: 600px) {
