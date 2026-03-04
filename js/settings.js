@@ -261,7 +261,11 @@ function openClearConfirmModal(type) {
           localStorage.setItem('quant_custom_topics', '[]');
           localStorage.setItem('quant_bookmarks', '[]');
           localStorage.setItem('quant_quick_links', JSON.stringify(['fractionTable', 'tablesContainer', 'formulaSections', 'mentalTricks']));
+          localStorage.setItem('quant_notifications_enabled', 'false');
         } catch (_) {}
+        if (typeof NotificationManager !== 'undefined') {
+          NotificationManager.cancelScheduledNotifications();
+        }
       }
       if (type === 'stats') {
         alert('Statistics cleared successfully.');

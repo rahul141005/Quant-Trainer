@@ -34,6 +34,12 @@ document.addEventListener('contextmenu', function (e) {
   e.preventDefault();
 });
 
+/* ---- Global error handling for unhandled promise rejections ---- */
+window.addEventListener('unhandledrejection', function (event) {
+  console.warn('Unhandled promise rejection:', event.reason);
+  event.preventDefault(); /* Prevent console error noise */
+});
+
 /* ---- Service Worker Registration ---- */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
@@ -344,6 +350,9 @@ function hideCustomNumpad() {
     var btn = e.target.closest('[data-numpad]');
     if (!btn || !_numpadInput) return;
     var key = btn.getAttribute('data-numpad');
+
+    /* Prevent input after answer is submitted (input is disabled) */
+    if (_numpadInput.disabled && key !== 'submit') return;
 
     if (key === 'submit') {
       if (_numpadSubmitCb) _numpadSubmitCb();

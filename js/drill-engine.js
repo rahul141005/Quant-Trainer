@@ -74,10 +74,13 @@ function createDrillEngine(container, opts) {
   function renderQuestion() {
     answered = false;
     var q = questions[current];
-    var progressPct = Math.round(((current) / count) * 100);
+    /* Use original count for progress display in review mode to avoid
+       confusing jumps when wrong answers add questions to the queue */
+    var displayCount = reviewMode && reviewOriginalCount > 0 ? reviewOriginalCount : count;
+    var progressPct = Math.min(100, Math.round(((current) / displayCount) * 100));
     container.innerHTML =
       '<div class="card center-content fade-in">' +
-        '<p class="drill-progress">Question ' + (current + 1) + ' / ' + count + '</p>' +
+        '<p class="drill-progress">Question ' + (current + 1) + ' / ' + displayCount + '</p>' +
         '<div class="drill-progress-bar"><div class="drill-progress-fill" style="width:' + progressPct + '%"></div></div>' +
         (timeLimit ? '<p id="globalTimer" class="timer"></p>' : '') +
         (perQLimit ? '<p id="perQTimer" class="timer"></p>' : '') +
@@ -211,6 +214,8 @@ function createDrillEngine(container, opts) {
   }
 
   function nextQuestion() {
+    /* Clear any pending auto-advance timer to prevent stale callbacks */
+    if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
     current++;
     if (current < count) {
       renderQuestion();

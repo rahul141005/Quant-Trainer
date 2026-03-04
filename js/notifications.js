@@ -28,11 +28,16 @@ var NotificationManager = (function () {
 
   /**
    * Check if notifications are enabled in local storage.
+   * Falls back to checking settings.notifications for Firestore sync compatibility.
    * @returns {boolean}
    */
   function isEnabled() {
     try {
-      return localStorage.getItem(NOTIF_KEY) === 'true';
+      var val = localStorage.getItem(NOTIF_KEY);
+      if (val !== null) return val === 'true';
+      /* Fallback: check settings object for Firestore-synced state */
+      var s = JSON.parse(localStorage.getItem('quant_reflex_settings') || '{}');
+      return s.notifications === true;
     } catch (_) { return false; }
   }
 

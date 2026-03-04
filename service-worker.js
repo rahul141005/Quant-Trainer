@@ -3,7 +3,7 @@
  * Caches all assets for offline use.
  */
 
-var CACHE_NAME = 'quant-reflex-v20';
+var CACHE_NAME = 'quant-reflex-v21';
 
 var ASSETS = [
   './',
@@ -61,7 +61,8 @@ self.addEventListener('activate', function (event) {
 
 /* Fetch: serve from cache, fall back to network.
    For Firebase CDN scripts, cache them on first fetch for offline use.
-   For Firebase API requests (auth/firestore), always go to network. */
+   For Firebase API requests (auth/firestore), always go to network.
+   For SPA navigation requests, fall back to cached index.html. */
 self.addEventListener('fetch', function (event) {
   var url = event.request.url;
 
@@ -76,6 +77,17 @@ self.addEventListener('fetch', function (event) {
       return;
     }
   } catch (e) { /* non-HTTP requests — proceed normally */ }
+
+  /* SPA navigation fallback: serve cached index.html for HTML navigation requests
+     so that deep links and browser refresh work offline */
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(function () {
+        return caches.match('./index.html');
+      })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(function (cached) {
@@ -92,6 +104,9 @@ self.addEventListener('fetch', function (event) {
           }
         }
         return response;
+      }).catch(function () {
+        /* Network failed and not in cache — return an offline-safe response */
+        return new Response('', { status: 408, statusText: 'Offline' });
       });
     })
   );

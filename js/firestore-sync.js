@@ -141,30 +141,55 @@ var FirestoreSync = (function () {
       bookmarks: []
     };
 
-    /* Override defaults with any existing local data */
+    /* Override defaults with any existing local data — validate types to prevent
+       corrupted localStorage from polluting Firestore */
     try {
       var localSettings = localStorage.getItem('quant_reflex_settings');
-      if (localSettings) defaults.settings = JSON.parse(localSettings);
+      if (localSettings) {
+        var parsedSettings = JSON.parse(localSettings);
+        if (parsedSettings && typeof parsedSettings === 'object' && !Array.isArray(parsedSettings)) {
+          defaults.settings = parsedSettings;
+        }
+      }
     } catch (_) {}
     try {
       var localStats = localStorage.getItem('quant_reflex_progress');
-      if (localStats) defaults.stats = JSON.parse(localStats);
+      if (localStats) {
+        var parsedStats = JSON.parse(localStats);
+        if (parsedStats && typeof parsedStats === 'object' && !Array.isArray(parsedStats) && typeof parsedStats.totalAttempted === 'number') {
+          defaults.stats = parsedStats;
+        }
+      }
     } catch (_) {}
     try {
       var localLinks = localStorage.getItem('quant_quick_links');
-      if (localLinks) defaults.quickLinks = JSON.parse(localLinks);
+      if (localLinks) {
+        var parsedLinks = JSON.parse(localLinks);
+        if (Array.isArray(parsedLinks)) defaults.quickLinks = parsedLinks;
+      }
     } catch (_) {}
     try {
       var localTopics = localStorage.getItem('quant_custom_topics');
-      if (localTopics) defaults.customTopics = JSON.parse(localTopics);
+      if (localTopics) {
+        var parsedTopics = JSON.parse(localTopics);
+        if (Array.isArray(parsedTopics)) defaults.customTopics = parsedTopics;
+      }
     } catch (_) {}
     try {
       var localFormulas = localStorage.getItem('quant_custom_formulas');
-      if (localFormulas) defaults.customFormulas = JSON.parse(localFormulas);
+      if (localFormulas) {
+        var parsedFormulas = JSON.parse(localFormulas);
+        if (parsedFormulas && typeof parsedFormulas === 'object' && !Array.isArray(parsedFormulas)) {
+          defaults.customFormulas = parsedFormulas;
+        }
+      }
     } catch (_) {}
     try {
       var localBookmarks = localStorage.getItem('quant_bookmarks');
-      if (localBookmarks) defaults.bookmarks = JSON.parse(localBookmarks);
+      if (localBookmarks) {
+        var parsedBookmarks = JSON.parse(localBookmarks);
+        if (Array.isArray(parsedBookmarks)) defaults.bookmarks = parsedBookmarks;
+      }
     } catch (_) {}
 
     _memoryCache = defaults;
@@ -344,7 +369,7 @@ var FirestoreSync = (function () {
       try { localStorage.setItem('quant_reflex_progress', JSON.stringify(resetStats)); } catch (_) {}
       if (_memoryCache) _memoryCache.stats = resetStats;
       if (docRef) {
-        docRef.update({ stats: resetStats }).then(function () {
+        docRef.set({ stats: resetStats }, { merge: true }).then(function () {
           if (callback) callback(null);
         }).catch(function (err) {
           if (callback) callback(err.message);
@@ -362,7 +387,7 @@ var FirestoreSync = (function () {
         _memoryCache.bookmarks = [];
       }
       if (docRef) {
-        docRef.update({ customFormulas: {}, customTopics: [], bookmarks: [] }).then(function () {
+        docRef.set({ customFormulas: {}, customTopics: [], bookmarks: [] }, { merge: true }).then(function () {
           if (callback) callback(null);
         }).catch(function (err) {
           if (callback) callback(err.message);
@@ -389,7 +414,13 @@ var FirestoreSync = (function () {
         localStorage.setItem('quant_custom_topics', '[]');
         localStorage.setItem('quant_custom_formulas', '{}');
         localStorage.setItem('quant_bookmarks', '[]');
+        /* Reset notification state when clearing all data */
+        localStorage.setItem('quant_notifications_enabled', 'false');
       } catch (_) {}
+      /* Cancel any active notification timers */
+      if (typeof NotificationManager !== 'undefined') {
+        NotificationManager.cancelScheduledNotifications();
+      }
       var resetAll = {
         settings: defaultSettings,
         stats: defaultStats,
