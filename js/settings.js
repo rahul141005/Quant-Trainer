@@ -92,14 +92,14 @@ function initSettingsView() {
   /* Daily goal input */
   var dailyGoalInput = document.getElementById('dailyGoalInput');
   if (dailyGoalInput) {
-    dailyGoalInput.value = settings.dailyGoal || 50;
-    rebind(dailyGoalInput, 'change', function () {
+    dailyGoalInput = rebind(dailyGoalInput, 'change', function () {
       var val = parseInt(this.value);
       if (val >= 10 && val <= 500) {
         settings.dailyGoal = val;
         saveSettings(settings);
       }
     });
+    dailyGoalInput.value = settings.dailyGoal || 50;
   }
 
   /* Notifications toggle */

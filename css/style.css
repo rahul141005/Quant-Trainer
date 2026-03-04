@@ -110,6 +110,8 @@ header h1 {
   box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
   border: 1px solid rgba(226,232,240,.6);
   transition: transform .15s ease, box-shadow .15s ease;
+  overflow: hidden;
+  word-break: break-word;
 }
 .card:active {
   transform: scale(.985);
@@ -235,6 +237,8 @@ a, button, input, select, textarea, label, .btn, .mode-card, .category-btn,
   margin-bottom: .75rem;
   letter-spacing: .02em;
   line-height: 1.3;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .feedback {

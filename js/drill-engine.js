@@ -75,8 +75,12 @@ function createDrillEngine(container, opts) {
     answered = false;
     var q = questions[current];
     /* Use original count for progress display in review mode to avoid
-       confusing jumps when wrong answers add questions to the queue */
-    var displayCount = reviewMode && reviewOriginalCount > 0 ? reviewOriginalCount : count;
+       confusing jumps when wrong answers add questions to the queue.
+       If current question exceeds original count (re-queued mistakes),
+       show actual count instead. */
+    var displayCount = reviewMode && reviewOriginalCount > 0
+      ? (current >= reviewOriginalCount ? count : reviewOriginalCount)
+      : count;
     var progressPct = displayCount > 0 ? Math.min(100, Math.round(((current) / displayCount) * 100)) : 0;
     container.innerHTML =
       '<div class="card center-content fade-in">' +
