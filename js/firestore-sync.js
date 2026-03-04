@@ -396,7 +396,10 @@ var FirestoreSync = (function () {
         customFormulas: {},
         bookmarks: []
       };
+      /* Preserve profile data in memory cache (account info should not be cleared) */
+      var existingProfile = _memoryCache ? _memoryCache.profile : null;
       _memoryCache = resetAll;
+      if (existingProfile) _memoryCache.profile = existingProfile;
       if (docRef) {
         docRef.set(resetAll, { merge: true }).then(function () {
           if (callback) callback(null);

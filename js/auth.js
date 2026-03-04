@@ -118,6 +118,7 @@ var Auth = (function () {
     var email = _usernameToEmail(clean);
     _auth.createUserWithEmailAndPassword(email, password)
       .then(function (cred) {
+        _currentUser = cred.user;
         callback(null, cred.user);
       })
       .catch(function (error) {
@@ -155,6 +156,7 @@ var Auth = (function () {
     var email = _usernameToEmail(clean);
     _auth.signInWithEmailAndPassword(email, password)
       .then(function (cred) {
+        _currentUser = cred.user;
         callback(null, cred.user);
       })
       .catch(function (error) {

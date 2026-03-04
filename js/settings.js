@@ -115,16 +115,13 @@ function initSettingsView() {
           if (err) {
             alert('Logout failed: ' + err);
           } else {
-            /* Reset sync state and show login screen */
+            /* Reset sync state before reload */
             if (typeof FirestoreSync !== 'undefined') {
               FirestoreSync.resetSyncState();
             }
-            var loginScreen = document.getElementById('loginScreen');
-            if (loginScreen) loginScreen.style.display = 'flex';
-            var container = document.querySelector('.container');
-            if (container) container.style.display = 'none';
-            var bottomNav = document.querySelector('.bottom-nav');
-            if (bottomNav) bottomNav.style.display = 'none';
+            /* Reload page for clean state — auth persistence keeps
+               the user logged out, and all JS state is reset */
+            window.location.reload();
           }
         });
       }
@@ -210,14 +207,17 @@ function openClearConfirmModal(type) {
         if (err) {
           alert('Failed to clear data: ' + err);
         } else {
-          if (type === 'all') {
-            /* Re-apply default settings */
-            document.body.classList.remove('dark-mode');
-          }
-          alert('Data cleared successfully.');
-          /* Refresh current view */
-          if (typeof Router !== 'undefined') {
-            Router.showView('settings');
+          if (type === 'stats') {
+            /* Stats only — re-render settings view without reload */
+            alert('Statistics cleared successfully.');
+            if (typeof Router !== 'undefined') {
+              Router.showView('settings');
+            }
+          } else {
+            /* Formulas or all — reload page for clean DOM state.
+               Auth persistence keeps the user logged in. */
+            alert('Data cleared successfully.');
+            window.location.reload();
           }
         }
       });
@@ -238,11 +238,15 @@ function openClearConfirmModal(type) {
           localStorage.setItem('quant_bookmarks', '[]');
           localStorage.removeItem('quant_reflex_settings');
         } catch (_) {}
-        document.body.classList.remove('dark-mode');
       }
-      alert('Data cleared successfully.');
-      if (typeof Router !== 'undefined') {
-        Router.showView('settings');
+      if (type === 'stats') {
+        alert('Statistics cleared successfully.');
+        if (typeof Router !== 'undefined') {
+          Router.showView('settings');
+        }
+      } else {
+        alert('Data cleared successfully.');
+        window.location.reload();
       }
     }
   };

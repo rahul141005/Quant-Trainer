@@ -407,8 +407,12 @@ document.addEventListener('DOMContentLoaded', function () {
           setButtonsDisabled(false);
           if (err) {
             showError(err);
+          } else {
+            /* Clear form fields for security */
+            if (loginUsername) loginUsername.value = '';
+            if (loginPassword) loginPassword.value = '';
+            showApp();
           }
-          /* On success, onAuthStateChanged fires and showApp() is called */
         });
       });
     }
@@ -424,8 +428,12 @@ document.addEventListener('DOMContentLoaded', function () {
           setButtonsDisabled(false);
           if (err) {
             showError(err);
+          } else {
+            /* Clear form fields for security */
+            if (loginUsername) loginUsername.value = '';
+            if (loginPassword) loginPassword.value = '';
+            showApp();
           }
-          /* On success, onAuthStateChanged fires and showApp() is called */
         });
       });
     }
