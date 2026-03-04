@@ -148,6 +148,13 @@ header h1 {
   line-height: 1.4;
 }
 
+/* Prevent 300ms tap delay on interactive elements */
+a, button, input, select, textarea, label, .btn, .mode-card, .category-btn,
+.table-select-btn, .learn-jump-btn, .study-card, .quick-link-option,
+.bottom-nav a, .collapsible-header {
+  touch-action: manipulation;
+}
+
 /* ---- Buttons ---- */
 .btn {
   display: inline-block;

@@ -26,6 +26,13 @@
   }
 })();
 
+/* ---- Prevent native context menu on long-press (native app feel) ---- */
+document.addEventListener('contextmenu', function (e) {
+  /* Allow context menu only on inputs and textareas */
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+  e.preventDefault();
+});
+
 /* ---- Service Worker Registration ---- */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {

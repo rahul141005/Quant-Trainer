@@ -306,6 +306,13 @@ var FirestoreSync = (function () {
     }
   });
 
+  /* Flush when app goes to background (mobile PWA) */
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden' && Object.keys(_pendingUpdates).length > 0) {
+      _flushUpdates();
+    }
+  });
+
   return {
     loadFromFirestore: loadFromFirestore,
     pushAllToFirestore: pushAllToFirestore,
