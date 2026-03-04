@@ -124,7 +124,9 @@ function createDrillEngine(container, opts) {
     /* Normalize both values for comparison:
        - trim whitespace
        - handle numeric equivalence (e.g. "57.0" == "57", "3234.00" == "3234")
-       - answer tolerance for decimal precision (33.33 matches 33.333, 33.3) */
+       - answer tolerance for decimal precision (33.33 matches 33.333, 33.3)
+       Tolerance: allow rounding differences up to 0.5% of the expected value
+       (min 0.05) to accept reasonable decimal approximations without being too lenient */
     var normalizedRaw = raw.replace(/\s/g, '');
     var normalizedExpected = expected.replace(/\s/g, '');
     var correct = false;

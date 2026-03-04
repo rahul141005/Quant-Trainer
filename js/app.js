@@ -391,7 +391,10 @@ function renderStatsView() {
   var weakest = getWeakestCategory();
   var strongest = getStrongestCategory();
 
-  /* Calculate improvement trend from daily history */
+  /* Calculate improvement trend from daily history.
+     Compare last 7 days accuracy vs prior 7 days.
+     A difference > 2% is considered meaningful enough to report as improving/declining,
+     while smaller changes are reported as steady to avoid noise from variance. */
   var trend = '—';
   var history = p.dailyHistory || {};
   var dates = Object.keys(history).sort();
