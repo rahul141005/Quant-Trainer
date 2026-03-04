@@ -17,25 +17,48 @@
       <p style="color:#64748b;margin-top:.35rem;">Train your mental math speed daily</p>
     </header>
 
-    <!-- Study Cards -->
-    <a href="drill.html" class="study-card">
-      <h3>🧠 Reflex Drills</h3>
-      <p>Practice random mental math questions to sharpen your calculation speed.</p>
+    <!-- Daily Warmup -->
+    <div class="card">
+      <h3 style="margin-bottom:.5rem;">☀️ Daily Warmup</h3>
+      <p class="secondary-text">Start your day with a quick 5-question warmup.</p>
+      <a href="practice.html?mode=quick" class="btn accent" style="margin-top:.75rem;">Start Warmup</a>
+    </div>
+
+    <!-- Progress Snapshot -->
+    <div class="card">
+      <h3 style="margin-bottom:.75rem;">📊 Progress Snapshot</h3>
+      <div class="stat-grid" id="homeStats">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Quick Study Cards -->
+    <h3 style="margin:1rem 0 .5rem;color:#64748b;font-size:.9rem;">QUICK STUDY</h3>
+
+    <a href="learn.html#fractionTable" class="study-card">
+      <h3>📐 Fraction → Percentage</h3>
+      <p>Master common fraction-to-percentage conversions.</p>
     </a>
 
-    <a href="learn.html" class="study-card">
-      <h3>📖 Study Tables &amp; Shortcuts</h3>
-      <p>Review multiplication tables, squares, cubes, and mental math tricks.</p>
+    <a href="learn.html#tablesContainer" class="study-card">
+      <h3>✖️ Multiplication Tables</h3>
+      <p>Review tables from 1 to 30.</p>
     </a>
 
-    <a href="test.html" class="study-card">
-      <h3>⏱ Timed Test</h3>
-      <p>Take a 3-minute quiz under exam-like conditions and track your score.</p>
+    <a href="learn.html#formulaSections" class="study-card">
+      <h3>📝 Quant Formulas</h3>
+      <p>Profit & Loss, Ratios, Averages, TSD formulas.</p>
     </a>
 
-    <a href="progress.html" class="study-card">
-      <h3>📊 View Progress</h3>
-      <p>See your accuracy, streaks, and total questions attempted over time.</p>
+    <a href="learn.html#mentalTricks" class="study-card">
+      <h3>💡 Shortcut Tricks</h3>
+      <p>Mental math tricks for faster calculations.</p>
+    </a>
+
+    <!-- Quick Drill -->
+    <a href="practice.html" class="study-card" style="border-left:3px solid #2563eb;">
+      <h3>⚡ Quick Reflex Drill</h3>
+      <p>Jump into a 5-question reflex drill right now.</p>
     </a>
 
     <!-- PWA install (shown when available) -->
@@ -45,12 +68,25 @@
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <a href="index.html" class="active"><span class="nav-icon">🏠</span>Home</a>
+    <a href="practice.html"><span class="nav-icon">🎯</span>Practice</a>
     <a href="learn.html"><span class="nav-icon">📖</span>Learn</a>
-    <a href="drill.html"><span class="nav-icon">🧠</span>Drill</a>
-    <a href="test.html"><span class="nav-icon">⏱</span>Test</a>
-    <a href="progress.html"><span class="nav-icon">📊</span>Stats</a>
+    <a href="stats.html"><span class="nav-icon">📊</span>Stats</a>
+    <a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a>
   </nav>
 
+  <script src="progress.js"></script>
+  <script>
+    /* Render home progress snapshot */
+    (function () {
+      var p = loadProgress();
+      var accuracy = p.totalAttempted ? ((p.totalCorrect / p.totalAttempted) * 100).toFixed(0) : '0';
+      document.getElementById('homeStats').innerHTML =
+        '<div class="stat-card"><div class="value">' + (p.todayAttempted || 0) + '</div><div class="label">Today</div></div>' +
+        '<div class="stat-card"><div class="value">' + accuracy + '%</div><div class="label">Accuracy</div></div>' +
+        '<div class="stat-card"><div class="value">' + (p.currentStreak || 0) + '</div><div class="label">Current Streak</div></div>' +
+        '<div class="stat-card"><div class="value">' + (p.bestStreak || 0) + '</div><div class="label">Best Streak</div></div>';
+    })();
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

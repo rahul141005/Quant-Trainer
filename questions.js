@@ -2,10 +2,10 @@
  * questions.js — Random question generator
  *
  * Categories:
- *   squares, cubes, fractions-to-percent,
- *   percentage-calculations, mental-multiplication
+ *   squares, cubes, fractions-to-percent, percentage-calculations,
+ *   mental-multiplication, ratios, averages, profit-loss, time-speed-distance
  *
- * Each generator returns { question: string, answer: number|string }
+ * Each generator returns { question: string, answer: number|string, category: string }
  */
 
 /* ---- helpers ---- */
@@ -21,19 +21,19 @@ function pick(arr) {
 
 /** Squares: n² where n ∈ [1, 30] */
 function genSquare() {
-  const n = randInt(1, 30);
-  return { question: `${n}² = ?`, answer: n * n };
+  var n = randInt(1, 30);
+  return { question: n + '² = ?', answer: n * n, category: 'squares' };
 }
 
-/** Cubes: n³ where n ∈ [1, 15] */
+/** Cubes: n³ where n ∈ [1, 20] */
 function genCube() {
-  const n = randInt(1, 15);
-  return { question: `${n}³ = ?`, answer: n * n * n };
+  var n = randInt(1, 20);
+  return { question: n + '³ = ?', answer: n * n * n, category: 'cubes' };
 }
 
 /** Fractions → percentage (complete table from spec) */
 function genFraction() {
-  const table = [
+  var table = [
     { frac: '1/2', pct: '50' },
     { frac: '1/3', pct: '33.33' },
     { frac: '2/3', pct: '66.66' },
@@ -63,34 +63,132 @@ function genFraction() {
     { frac: '1/40', pct: '2.5' },
     { frac: '1/50', pct: '2' }
   ];
-  const item = pick(table);
-  return { question: `${item.frac} = ?%`, answer: item.pct };
+  var item = pick(table);
+  return { question: item.frac + ' = ?%', answer: item.pct, category: 'fractions' };
 }
 
 /** Percentage calculations: x% of y */
 function genPercentage() {
-  const pcts = [10, 15, 20, 25, 30, 50];
-  const bases = [120, 200, 250, 300, 400, 450, 500, 600, 800, 1000];
-  const p = pick(pcts);
-  const b = pick(bases);
-  return { question: `${p}% of ${b} = ?`, answer: (p / 100) * b };
+  var pcts = [10, 15, 20, 25, 30, 50];
+  var bases = [120, 200, 250, 300, 400, 450, 500, 600, 800, 1000];
+  var p = pick(pcts);
+  var b = pick(bases);
+  return { question: p + '% of ' + b + ' = ?', answer: (p / 100) * b, category: 'percentages' };
 }
 
-/** Mental multiplication tricks: x × 5, x × 25, x × 125 */
+/** Mental multiplication: x × m */
 function genMultiplication() {
-  const multipliers = [5, 25, 125];
-  const m = pick(multipliers);
-  const x = randInt(2, 64);
-  return { question: `${x} × ${m} = ?`, answer: x * m };
+  var x = randInt(2, 99);
+  var y = randInt(2, 50);
+  return { question: x + ' × ' + y + ' = ?', answer: x * y, category: 'multiplication' };
 }
+
+/** Ratio: percentage increase/decrease expressed as ratio */
+function genRatio() {
+  var scenarios = [
+    { q: 'A is 25% more than B. A:B = ?', a: '5:4' },
+    { q: 'A is 20% less than B. A:B = ?', a: '4:5' },
+    { q: 'A is 50% more than B. A:B = ?', a: '3:2' },
+    { q: 'A is 33.33% more than B. A:B = ?', a: '4:3' },
+    { q: 'A is 20% more than B. A:B = ?', a: '6:5' },
+    { q: 'A is 25% less than B. A:B = ?', a: '3:4' },
+    { q: 'A is 40% more than B. A:B = ?', a: '7:5' },
+    { q: 'A is 10% less than B. A:B = ?', a: '9:10' },
+    { q: 'A is 60% more than B. A:B = ?', a: '8:5' },
+    { q: 'A is 75% more than B. A:B = ?', a: '7:4' }
+  ];
+  var s = pick(scenarios);
+  return { question: s.q, answer: s.a, category: 'ratios' };
+}
+
+/** Average calculations */
+function genAverage() {
+  var count = randInt(3, 6);
+  var nums = [];
+  for (var i = 0; i < count; i++) nums.push(randInt(10, 100));
+  var sum = nums.reduce(function (a, b) { return a + b; }, 0);
+  var avg = sum / count;
+  /* Use whole-number averages only */
+  if (avg !== Math.floor(avg)) {
+    nums[0] += (Math.ceil(avg) * count) - sum;
+    sum = nums.reduce(function (a, b) { return a + b; }, 0);
+    avg = sum / count;
+  }
+  return {
+    question: 'Average of ' + nums.join(', ') + ' = ?',
+    answer: avg,
+    category: 'averages'
+  };
+}
+
+/** Profit and Loss calculations */
+function genProfitLoss() {
+  var type = randInt(0, 2);
+  if (type === 0) {
+    /* Find SP given CP and profit% */
+    var cp = pick([100, 200, 250, 400, 500, 800]);
+    var profitPct = pick([10, 15, 20, 25, 30, 50]);
+    var sp = cp * (1 + profitPct / 100);
+    return { question: 'CP = ' + cp + ', Profit = ' + profitPct + '%. SP = ?', answer: sp, category: 'profit-loss' };
+  } else if (type === 1) {
+    /* Find SP given CP and loss% */
+    var cp2 = pick([100, 200, 250, 400, 500, 800]);
+    var lossPct = pick([10, 15, 20, 25]);
+    var sp2 = cp2 * (1 - lossPct / 100);
+    return { question: 'CP = ' + cp2 + ', Loss = ' + lossPct + '%. SP = ?', answer: sp2, category: 'profit-loss' };
+  } else {
+    /* Find profit% given CP and SP */
+    var cp3 = pick([100, 200, 250, 400, 500]);
+    var profitPct2 = pick([10, 20, 25, 50]);
+    var sp3 = cp3 * (1 + profitPct2 / 100);
+    return { question: 'CP = ' + cp3 + ', SP = ' + sp3 + '. Profit% = ?', answer: profitPct2, category: 'profit-loss' };
+  }
+}
+
+/** Time, Speed, Distance calculations */
+function genTSD() {
+  var type = randInt(0, 2);
+  if (type === 0) {
+    /* Find distance given speed and time */
+    var speed = pick([20, 30, 40, 50, 60, 80]);
+    var time = pick([2, 3, 4, 5, 6]);
+    return { question: 'Speed = ' + speed + ' km/h, Time = ' + time + ' hrs. Distance = ?', answer: speed * time, category: 'time-speed-distance' };
+  } else if (type === 1) {
+    /* Find time given speed and distance */
+    var speed2 = pick([20, 30, 40, 50, 60]);
+    var time2 = pick([2, 3, 4, 5]);
+    var dist = speed2 * time2;
+    return { question: 'Speed = ' + speed2 + ' km/h, Distance = ' + dist + ' km. Time = ?', answer: time2, category: 'time-speed-distance' };
+  } else {
+    /* Find speed given distance and time */
+    var speed3 = pick([20, 30, 40, 50, 60, 80]);
+    var time3 = pick([2, 3, 4, 5]);
+    var dist2 = speed3 * time3;
+    return { question: 'Distance = ' + dist2 + ' km, Time = ' + time3 + ' hrs. Speed = ?', answer: speed3, category: 'time-speed-distance' };
+  }
+}
+
+/* ---- category map for focus training ---- */
+var categoryGenerators = {
+  squares: genSquare,
+  cubes: genCube,
+  fractions: genFraction,
+  percentages: genPercentage,
+  multiplication: genMultiplication,
+  ratios: genRatio,
+  averages: genAverage,
+  'profit-loss': genProfitLoss,
+  'time-speed-distance': genTSD
+};
 
 /* ---- public API ---- */
 
-const generators = [genSquare, genCube, genFraction, genPercentage, genMultiplication];
+var generators = [genSquare, genCube, genFraction, genPercentage, genMultiplication,
+  genRatio, genAverage, genProfitLoss, genTSD];
 
 /**
- * Generate a single random question.
- * @returns {{ question: string, answer: number|string }}
+ * Generate a single random question (all categories).
+ * @returns {{ question: string, answer: number|string, category: string }}
  */
 function generateQuestion() {
   return pick(generators)();
@@ -99,10 +197,14 @@ function generateQuestion() {
 /**
  * Generate an array of n random questions.
  * @param {number} n
- * @returns {Array<{ question: string, answer: number|string }>}
+ * @param {string} [category] - optional category filter
+ * @returns {Array<{ question: string, answer: number|string, category: string }>}
  */
-function generateQuestions(n) {
-  const qs = [];
-  for (let i = 0; i < n; i++) qs.push(generateQuestion());
+function generateQuestions(n, category) {
+  var gen = category && categoryGenerators[category] ? categoryGenerators[category] : null;
+  var qs = [];
+  for (var i = 0; i < n; i++) {
+    qs.push(gen ? gen() : generateQuestion());
+  }
   return qs;
 }
