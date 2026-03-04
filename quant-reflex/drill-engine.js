@@ -126,7 +126,7 @@ function createDrillEngine(container, opts) {
     function tick() {
       const el = document.getElementById('globalTimer');
       if (el) el.textContent = `⏱ ${remaining}s`;
-      if (remaining <= 0) { finish(); return; }
+      if (remaining <= 0) { clearInterval(overallTimer); finish(); return; }
       remaining--;
     }
     tick();

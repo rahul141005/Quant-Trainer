@@ -83,7 +83,6 @@ header h1 {
 .btn.accent { background: #38bdf8; color: #0f172a; }
 .btn.accent:hover { background: #7dd3fc; }
 .btn:hover { background: #475569; }
-.btn.accent:hover { background: #7dd3fc; }
 
 /* ---- Inputs ---- */
 .input {
