@@ -133,10 +133,16 @@ function genPercentage() {
     }
   } else {
     p = pick(percentages);
+    var pctAttempts = 0;
     do {
       b = randInt(2, 20) * pick([10, 20, 25, 50, 100]);
       result = (p / 100) * b;
-    } while (result !== Math.floor(result));
+      pctAttempts++;
+    } while (result !== Math.floor(result) && pctAttempts < 50);
+    /* Fallback to guaranteed whole-number result */
+    if (result !== Math.floor(result)) {
+      p = 10; b = 200; result = 20;
+    }
   }
 
   return { question: p + '% of ' + b + ' = ?', answer: result, category: 'percentages' };
@@ -219,7 +225,16 @@ function genAverage() {
   var avg = sum / count;
   /* Use whole-number averages only */
   if (avg !== Math.floor(avg)) {
-    nums[0] += (Math.ceil(avg) * count) - sum;
+    var adjustment = (Math.ceil(avg) * count) - sum;
+    nums[0] += adjustment;
+    /* Ensure no negative numbers after adjustment */
+    if (nums[0] <= 0) {
+      nums[0] = minVal;
+      sum = nums.reduce(function (a, b) { return a + b; }, 0);
+      avg = Math.round(sum / count);
+      /* Force the sum to be divisible by count */
+      nums[0] += (avg * count) - sum;
+    }
     sum = nums.reduce(function (a, b) { return a + b; }, 0);
     avg = sum / count;
   }
@@ -237,12 +252,25 @@ function genAverageMissing() {
   var totalSum = avg * count;
   var nums = [];
   var partialSum = 0;
+  /* Generate numbers close to the average to keep the missing value reasonable */
   for (var i = 0; i < count - 1; i++) {
-    var n = randInt(10, 100);
+    var n = randInt(Math.max(1, avg - 30), avg + 30);
     nums.push(n);
     partialSum += n;
   }
   var missing = totalSum - partialSum;
+  /* Regenerate if missing value is negative or unreasonably large */
+  if (missing <= 0 || missing > 200) {
+    /* Fallback: adjust last known number to make missing value reasonable */
+    var target = randInt(Math.max(1, avg - 20), avg + 20);
+    nums[nums.length - 1] = totalSum - (partialSum - nums[nums.length - 1]) - target;
+    partialSum = nums.reduce(function (a, b) { return a + b; }, 0);
+    missing = totalSum - partialSum;
+    /* Final fallback */
+    if (missing <= 0 || missing > 200) {
+      return genAverage();
+    }
+  }
   return {
     question: 'Average of ' + nums.join(', ') + ', x is ' + avg + '. x = ?',
     answer: missing,
@@ -256,20 +284,30 @@ function genProfitLoss() {
   var type = randInt(0, 2);
 
   if (type === 0) {
-    /* Find SP given CP and profit% */
-    var cpMult = diff === 'easy' ? [100, 200] : (diff === 'hard' ? [100, 200, 250, 500] : [50, 100, 200]);
+    /* Find SP given CP and profit% — ensure whole-number result */
     var profitOpts = diff === 'easy' ? [10, 20, 25, 50] : (diff === 'hard' ? [5, 8, 10, 12, 15, 20, 25, 30, 40, 50] : [5, 10, 15, 20, 25, 30, 40, 50]);
-    var cp = randInt(1, 10) * pick(cpMult);
     var profitPct = pick(profitOpts);
-    var sp = cp * (1 + profitPct / 100);
+    var cp, sp;
+    var plAttempts = 0;
+    do {
+      cp = randInt(1, 10) * 100;
+      sp = cp * (1 + profitPct / 100);
+      plAttempts++;
+    } while (sp !== Math.floor(sp) && plAttempts < 30);
+    if (sp !== Math.floor(sp)) { cp = 200; profitPct = 25; sp = 250; }
     return { question: 'CP = ' + cp + ', Profit = ' + profitPct + '%. SP = ?', answer: sp, category: 'profit-loss' };
   } else if (type === 1) {
-    /* Find SP given CP and loss% */
-    var cpMult2 = diff === 'easy' ? [100, 200] : [50, 100, 200];
+    /* Find SP given CP and loss% — ensure whole-number result */
     var lossOpts = diff === 'easy' ? [10, 20, 25] : [5, 10, 15, 20, 25];
-    var cp2 = randInt(1, 10) * pick(cpMult2);
     var lossPct = pick(lossOpts);
-    var sp2 = cp2 * (1 - lossPct / 100);
+    var cp2, sp2;
+    var plAttempts2 = 0;
+    do {
+      cp2 = randInt(1, 10) * 100;
+      sp2 = cp2 * (1 - lossPct / 100);
+      plAttempts2++;
+    } while (sp2 !== Math.floor(sp2) && plAttempts2 < 30);
+    if (sp2 !== Math.floor(sp2)) { cp2 = 200; lossPct = 20; sp2 = 160; }
     return { question: 'CP = ' + cp2 + ', Loss = ' + lossPct + '%. SP = ?', answer: sp2, category: 'profit-loss' };
   } else {
     /* Find profit% given CP and SP */

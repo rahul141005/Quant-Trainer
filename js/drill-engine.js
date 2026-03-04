@@ -119,7 +119,19 @@ function createDrillEngine(container, opts) {
 
     var q = questions[current];
     var expected = String(q.answer);
-    var correct = raw === expected;
+
+    /* Normalize both values for comparison:
+       - trim whitespace
+       - handle numeric equivalence (e.g. "57.0" == "57", "3234.00" == "3234") */
+    var normalizedRaw = raw.replace(/\s/g, '');
+    var normalizedExpected = expected.replace(/\s/g, '');
+    var correct = false;
+
+    if (normalizedRaw === normalizedExpected) {
+      correct = true;
+    } else if (normalizedRaw !== '' && !isNaN(normalizedRaw) && !isNaN(normalizedExpected)) {
+      correct = parseFloat(normalizedRaw) === parseFloat(normalizedExpected);
+    }
 
     if (correct) {
       score++;

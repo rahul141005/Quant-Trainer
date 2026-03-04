@@ -16,7 +16,11 @@ function loadSettings() {
 }
 
 function saveSettings(s) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  } catch (e) {
+    console.warn('Failed to save settings:', e);
+  }
 }
 
 function getDifficulty() {
@@ -44,6 +48,7 @@ function initSettingsView() {
 
   /* Remove old listeners by cloning */
   function rebind(el, event, handler) {
+    if (!el) return null;
     var newEl = el.cloneNode(true);
     el.parentNode.replaceChild(newEl, el);
     newEl.addEventListener(event, handler);

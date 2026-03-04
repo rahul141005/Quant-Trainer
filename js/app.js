@@ -62,6 +62,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  /* ---- Cleanup drill engine on back/forward navigation ---- */
+  window.addEventListener('popstate', function () {
+    if (_activeDrillEngine) {
+      _activeDrillEngine.cleanup();
+      _activeDrillEngine = null;
+    }
+  });
+
   /* ---- HOME VIEW: render stats on every show ---- */
   Router.onShow('home', function () {
     var p = loadProgress();
@@ -336,6 +344,40 @@ function initLearnView() {
         } else {
           var cardText = card.textContent.toLowerCase();
           card.style.display = cardText.indexOf(query) !== -1 ? '' : 'none';
+        }
+      }
+      /* Hide group titles and descriptions when all children are filtered out */
+      var groupTitles = document.querySelectorAll('#view-learn .learn-group-title');
+      for (var g = 0; g < groupTitles.length; g++) {
+        var titleEl = groupTitles[g];
+        if (!query) {
+          titleEl.style.display = '';
+          /* Also show the description paragraph after the title */
+          if (titleEl.nextElementSibling && titleEl.nextElementSibling.classList.contains('secondary-text')) {
+            titleEl.nextElementSibling.style.display = '';
+          }
+          continue;
+        }
+        /* Check if any sibling cards between this title and the next title are visible */
+        var hasVisible = false;
+        var sibling = titleEl.nextElementSibling;
+        while (sibling && !sibling.classList.contains('learn-group-title')) {
+          if (sibling.classList.contains('card') || sibling.classList.contains('learn-searchable') || sibling.id === 'topicSections') {
+            if (sibling.id === 'topicSections') {
+              /* Check if any cards inside topicSections are visible */
+              var innerCards = sibling.querySelectorAll('.card');
+              for (var ic = 0; ic < innerCards.length; ic++) {
+                if (innerCards[ic].style.display !== 'none') { hasVisible = true; break; }
+              }
+            } else if (sibling.style.display !== 'none') {
+              hasVisible = true;
+            }
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        titleEl.style.display = hasVisible ? '' : 'none';
+        if (titleEl.nextElementSibling && titleEl.nextElementSibling.classList.contains('secondary-text')) {
+          titleEl.nextElementSibling.style.display = hasVisible ? '' : 'none';
         }
       }
     });

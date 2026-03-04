@@ -62,7 +62,11 @@ function loadProgress() {
 
 /** Persist progress to localStorage */
 function saveProgress(data) {
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Failed to save progress:', e);
+  }
 }
 
 /**

@@ -66,9 +66,9 @@ var Router = (function () {
 
     currentView = viewId;
 
-    /* Update hash without triggering hashchange */
+    /* Update hash — use pushState to enable back button navigation */
     if (window.location.hash !== '#' + viewId) {
-      history.replaceState(null, '', '#' + viewId);
+      history.pushState({ view: viewId }, '', '#' + viewId);
     }
 
     /* Scroll to top */
@@ -90,8 +90,8 @@ var Router = (function () {
     var hash = window.location.hash.replace('#', '') || 'home';
     showView(hash);
 
-    /* Listen for hash changes (back/forward) */
-    window.addEventListener('hashchange', function () {
+    /* Listen for back/forward button navigation */
+    window.addEventListener('popstate', function () {
       var hash = window.location.hash.replace('#', '') || 'home';
       showView(hash);
     });
