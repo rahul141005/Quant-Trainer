@@ -54,18 +54,24 @@ function initSettingsView() {
     settings.darkMode = this.checked;
     document.body.classList.toggle('dark-mode', this.checked);
     saveSettings(settings);
+    SoundEngine.play('settingsToggle');
   });
   darkToggle.checked = settings.darkMode || false;
 
   soundToggle = rebind(soundToggle, 'change', function () {
     settings.sound = this.checked;
     saveSettings(settings);
+    /* Only play confirmation sound when enabling sound */
+    if (this.checked) {
+      SoundEngine.play('settingsToggle');
+    }
   });
   soundToggle.checked = settings.sound !== false;
 
   vibrationToggle = rebind(vibrationToggle, 'change', function () {
     settings.vibration = this.checked;
     saveSettings(settings);
+    SoundEngine.play('settingsToggle');
   });
   vibrationToggle.checked = settings.vibration !== false;
 
