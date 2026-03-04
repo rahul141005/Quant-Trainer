@@ -64,8 +64,8 @@ var NotificationManager = (function () {
   }
 
   /**
-   * Request notification permission and register FCM token.
-   * @param {function} [callback] - receives (error, token)
+   * Request notification permission from the browser.
+   * @param {function} [callback] - receives (error, permission)
    */
   function requestPermission(callback) {
     if (!('Notification' in window)) {
@@ -75,7 +75,7 @@ var NotificationManager = (function () {
 
     Notification.requestPermission().then(function (permission) {
       if (permission === 'granted') {
-        _registerToken(callback);
+        if (callback) callback(null, permission);
       } else {
         if (callback) callback('Permission denied');
       }
@@ -222,6 +222,8 @@ var NotificationManager = (function () {
 
   /**
    * Enable notifications: request permission, register token, schedule.
+   * FCM token registration is best-effort — local notifications still
+   * work even when Firebase Messaging is unavailable.
    * @param {function} [callback] - receives (error)
    */
   function enable(callback) {
@@ -232,6 +234,15 @@ var NotificationManager = (function () {
       }
       setEnabled(true);
       scheduleNotifications();
+
+      /* Attempt FCM token registration as best-effort for push support.
+         Failure does not affect local notification scheduling. */
+      _registerToken(function (tokenErr) {
+        if (tokenErr) {
+          console.warn('FCM token registration failed (local notifications still active):', tokenErr);
+        }
+      });
+
       if (callback) callback(null);
     });
   }
