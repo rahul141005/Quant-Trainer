@@ -175,6 +175,10 @@ function initSettingsView() {
 function openClearDataModal() {
   var modal = document.getElementById('clearDataModal');
   if (!modal) return;
+  /* Prevent duplicate overlays */
+  var confirmModal = document.getElementById('clearConfirmModal');
+  if (confirmModal) confirmModal.style.display = 'none';
+
   modal.style.display = 'flex';
 
   var cancelBtn = document.getElementById('clearDataCancel');

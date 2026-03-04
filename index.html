@@ -339,86 +339,96 @@
         <button id="installBtn" class="btn accent">Install App</button>
       </div>
 
-      <!-- Dark Mode -->
-      <div class="card settings-row">
-        <div class="settings-label">
-          <h3>🌙 Dark Mode</h3>
-          <p>Switch between light and dark theme</p>
+      <!-- Section 1: Appearance -->
+      <div class="settings-group">
+        <div class="card settings-row">
+          <div class="settings-label">
+            <h3>🌙 Dark Mode</h3>
+            <p>Switch between light and dark theme</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="toggle-slider"></span>
+          </label>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="darkModeToggle" />
-          <span class="toggle-slider"></span>
-        </label>
       </div>
 
-      <!-- Sound Feedback -->
-      <div class="card settings-row">
-        <div class="settings-label">
-          <h3>🔊 Sound Feedback</h3>
-          <p>Play sound on correct/wrong answers</p>
+      <div class="settings-divider"></div>
+
+      <!-- Section 2: Training -->
+      <div class="settings-group">
+        <div class="card">
+          <h3 style="margin-bottom:.5rem;">📈 Difficulty Level</h3>
+          <p class="secondary-text" style="margin-bottom:.75rem;">Adjusts question complexity</p>
+          <select id="difficultySelect" class="input" style="text-align:left;">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="soundToggle" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
 
-      <!-- Vibration Feedback -->
-      <div class="card settings-row">
-        <div class="settings-label">
-          <h3>📳 Vibration</h3>
-          <p>Vibrate on correct answers</p>
+        <div class="card settings-row">
+          <div class="settings-label">
+            <h3>🎯 Daily Goal</h3>
+            <p>Set your daily question target</p>
+          </div>
+          <input type="number" id="dailyGoalInput" class="goal-input" min="10" max="500" step="10" value="50" />
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="vibrationToggle" />
-          <span class="toggle-slider"></span>
-        </label>
       </div>
 
-      <!-- Difficulty Level -->
-      <div class="card">
-        <h3 style="margin-bottom:.5rem;">📈 Difficulty Level</h3>
-        <p class="secondary-text" style="margin-bottom:.75rem;">Adjusts question complexity</p>
-        <select id="difficultySelect" class="input" style="text-align:left;">
-          <option value="easy">Easy</option>
-          <option value="medium" selected>Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-      </div>
+      <div class="settings-divider"></div>
 
-      <!-- Notifications -->
-      <div class="card settings-row">
-        <div class="settings-label">
-          <h3>🔔 Notifications</h3>
-          <p>Receive daily motivational reminders</p>
+      <!-- Section 3: Feedback & Notifications -->
+      <div class="settings-group">
+        <div class="card settings-row">
+          <div class="settings-label">
+            <h3>🔊 Sound Feedback</h3>
+            <p>Play sound on correct/wrong answers</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="soundToggle" />
+            <span class="toggle-slider"></span>
+          </label>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="notificationsToggle" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
 
-      <!-- Daily Goal -->
-      <div class="card settings-row">
-        <div class="settings-label">
-          <h3>🎯 Daily Goal</h3>
-          <p>Set your daily question target</p>
+        <div class="card settings-row">
+          <div class="settings-label">
+            <h3>📳 Vibration</h3>
+            <p>Vibrate on correct answers</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="vibrationToggle" />
+            <span class="toggle-slider"></span>
+          </label>
         </div>
-        <input type="number" id="dailyGoalInput" class="goal-input" min="10" max="500" step="10" value="50" />
+
+        <div class="card settings-row">
+          <div class="settings-label">
+            <h3>🔔 Notifications</h3>
+            <p>Receive daily motivational reminders</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="notificationsToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
 
-      <!-- Reset Progress -->
-      <div class="card">
-        <h3 style="margin-bottom:.5rem;">🗑️ Clear Data</h3>
-        <p class="secondary-text" style="margin-bottom:.75rem;">Clear specific data or reset everything</p>
-        <button id="clearDataBtn" class="btn" style="background:#fee2e2;color:#dc2626;">Clear Data</button>
-      </div>
+      <div class="settings-divider"></div>
 
-      <!-- Logout -->
-      <div class="card" id="logoutCard">
-        <h3 style="margin-bottom:.5rem;">🚪 Account</h3>
-        <p class="secondary-text" style="margin-bottom:.75rem;">Log out of your account on this device</p>
-        <button id="logoutBtn" class="btn" style="background:#fef3c7;color:#92400e;">Log Out</button>
+      <!-- Section 4: Data & Account -->
+      <div class="settings-group">
+        <div class="card">
+          <h3 style="margin-bottom:.5rem;">🗑️ Clear Data</h3>
+          <p class="secondary-text" style="margin-bottom:.75rem;">Clear specific data or reset everything</p>
+          <button id="clearDataBtn" class="btn" style="background:#fee2e2;color:#dc2626;">Clear Data</button>
+        </div>
+
+        <div class="card" id="logoutCard">
+          <h3 style="margin-bottom:.5rem;">🚪 Account</h3>
+          <p class="secondary-text" style="margin-bottom:.75rem;">Log out of your account on this device</p>
+          <button id="logoutBtn" class="btn" style="background:#fef3c7;color:#92400e;">Log Out</button>
+        </div>
       </div>
     </div>
 
