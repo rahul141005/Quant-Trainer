@@ -161,11 +161,11 @@ function genMultiplication() {
     x = randInt(2, 20);
     y = randInt(2, 12);
   } else if (diff === 'hard') {
-    x = randInt(11, 999);
-    y = randInt(2, 99);
+    x = randInt(11, 99);
+    y = randInt(2, 49);
   } else {
-    x = randInt(2, 99);
-    y = randInt(2, 50);
+    x = randInt(2, 50);
+    y = randInt(2, 30);
   }
   return { question: x + ' × ' + y + ' = ?', answer: x * y, category: 'multiplication' };
 }
@@ -217,8 +217,8 @@ function genAverage() {
     if (randInt(0, 1) === 0) {
       return genAverageMissing();
     }
-    count = randInt(4, 7);
-    minVal = 10; maxVal = 200;
+    count = randInt(4, 6);
+    minVal = 10; maxVal = 150;
   } else {
     count = randInt(3, 6);
     minVal = 10; maxVal = 100;
@@ -333,7 +333,7 @@ function genProfitLoss() {
     /* Find profit% given CP and SP */
     var cp3 = randInt(1, 10) * 100;
     var profitPct2 = pick([10, 15, 20, 25, 30, 50]);
-    var sp3 = cp3 * (1 + profitPct2 / 100);
+    var sp3 = Math.round(cp3 * (1 + profitPct2 / 100));
     return { question: 'CP = ' + cp3 + ', SP = ' + sp3 + '. Profit% = ?', answer: profitPct2, category: 'profit-loss' };
   }
 }

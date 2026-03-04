@@ -58,6 +58,7 @@ function initSettingsView() {
     document.body.classList.toggle('dark-mode', this.checked);
     saveSettings(settings);
     SoundEngine.play('settingsToggle');
+    if (typeof triggerHaptic === 'function') triggerHaptic(15);
   });
   darkToggle.checked = settings.darkMode || false;
 
@@ -68,6 +69,7 @@ function initSettingsView() {
     if (this.checked) {
       SoundEngine.play('settingsToggle');
     }
+    if (typeof triggerHaptic === 'function') triggerHaptic(15);
   });
   soundToggle.checked = settings.sound !== false;
 
@@ -75,6 +77,8 @@ function initSettingsView() {
     settings.vibration = this.checked;
     saveSettings(settings);
     SoundEngine.play('settingsToggle');
+    /* Provide feedback vibration when turning on; skip check since user is toggling this */
+    if (this.checked && typeof navigator.vibrate === 'function') navigator.vibrate(15);
   });
   vibrationToggle.checked = settings.vibration !== false;
 
@@ -88,14 +92,36 @@ function initSettingsView() {
   /* Daily goal input */
   var dailyGoalInput = document.getElementById('dailyGoalInput');
   if (dailyGoalInput) {
-    dailyGoalInput.value = settings.dailyGoal || 50;
-    rebind(dailyGoalInput, 'change', function () {
+    dailyGoalInput = rebind(dailyGoalInput, 'change', function () {
       var val = parseInt(this.value);
       if (val >= 10 && val <= 500) {
         settings.dailyGoal = val;
         saveSettings(settings);
       }
     });
+    dailyGoalInput.value = settings.dailyGoal || 50;
+  }
+
+  /* Notifications toggle */
+  var notifToggle = document.getElementById('notificationsToggle');
+  if (notifToggle) {
+    var notifEnabled = typeof NotificationManager !== 'undefined' && NotificationManager.isEnabled();
+    notifToggle = rebind(notifToggle, 'change', function () {
+      var toggle = this;
+      if (typeof NotificationManager === 'undefined') return;
+      if (toggle.checked) {
+        NotificationManager.enable(function (err) {
+          if (err) {
+            toggle.checked = false;
+            console.warn('Notifications could not be enabled:', err);
+          }
+        });
+      } else {
+        NotificationManager.disable();
+      }
+      SoundEngine.play('settingsToggle');
+    });
+    notifToggle.checked = notifEnabled;
   }
 
   /* Clear Data button — opens modal */
@@ -229,15 +255,21 @@ function openClearConfirmModal(type) {
         try {
           localStorage.setItem('quant_custom_formulas', '{}');
           localStorage.setItem('quant_custom_topics', '[]');
+          localStorage.setItem('quant_bookmarks', '[]');
         } catch (_) {}
       } else if (type === 'all') {
         resetProgress();
         try {
+          localStorage.setItem('quant_reflex_settings', JSON.stringify({ darkMode: false, sound: true, vibration: true, difficulty: 'medium', dailyGoal: 50 }));
           localStorage.setItem('quant_custom_formulas', '{}');
           localStorage.setItem('quant_custom_topics', '[]');
           localStorage.setItem('quant_bookmarks', '[]');
-          localStorage.removeItem('quant_reflex_settings');
+          localStorage.setItem('quant_quick_links', JSON.stringify(['fractionTable', 'tablesContainer', 'formulaSections', 'mentalTricks']));
+          localStorage.setItem('quant_notifications_enabled', 'false');
         } catch (_) {}
+        if (typeof NotificationManager !== 'undefined') {
+          NotificationManager.cancelScheduledNotifications();
+        }
       }
       if (type === 'stats') {
         alert('Statistics cleared successfully.');

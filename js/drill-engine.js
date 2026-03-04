@@ -51,6 +51,7 @@ function createDrillEngine(container, opts) {
   var perQTimer = null;
   var autoAdvanceTimer = null;
   var answered = false; /* prevents double-counting */
+  var reviewOriginalCount = 0; /* track original count for review mode cap */
 
   /* ---- render helpers ---- */
 
@@ -66,21 +67,29 @@ function createDrillEngine(container, opts) {
         '<p>' + subtitle + '</p>' +
         '<button id="startBtn" class="btn accent">START</button>' +
       '</div>';
+    hideCustomNumpad();
     container.querySelector('#startBtn').addEventListener('click', begin);
   }
 
   function renderQuestion() {
     answered = false;
     var q = questions[current];
-    var progressPct = Math.round(((current) / count) * 100);
+    /* Use original count for progress display in review mode to avoid
+       confusing jumps when wrong answers add questions to the queue.
+       If current question exceeds original count (re-queued mistakes),
+       show actual count instead. */
+    var displayCount = reviewMode && reviewOriginalCount > 0
+      ? (current >= reviewOriginalCount ? count : reviewOriginalCount)
+      : count;
+    var progressPct = displayCount > 0 ? Math.min(100, Math.round(((current) / displayCount) * 100)) : 0;
     container.innerHTML =
       '<div class="card center-content fade-in">' +
-        '<p class="drill-progress">Question ' + (current + 1) + ' / ' + count + '</p>' +
+        '<p class="drill-progress">Question ' + (current + 1) + ' / ' + displayCount + '</p>' +
         '<div class="drill-progress-bar"><div class="drill-progress-fill" style="width:' + progressPct + '%"></div></div>' +
         (timeLimit ? '<p id="globalTimer" class="timer"></p>' : '') +
         (perQLimit ? '<p id="perQTimer" class="timer"></p>' : '') +
         '<h2 class="question-text">' + q.question + '</h2>' +
-        '<input id="answerInput" class="input" type="text" inputmode="decimal" autocomplete="off" placeholder="Your answer" />' +
+        '<input id="answerInput" class="input" type="text" inputmode="none" autocomplete="off" placeholder="Your answer" readonly />' +
         '<div id="feedback" class="feedback"></div>' +
         '<button id="submitBtn" class="btn accent">Submit</button>' +
       '</div>';
@@ -102,6 +111,11 @@ function createDrillEngine(container, opts) {
     });
 
     qStart = performance.now();
+
+    /* Show custom numpad */
+    showCustomNumpad(input, function() {
+      if (!answered) checkAnswer(input.value.trim());
+    });
 
     /* Per-question timer */
     if (perQLimit) {
@@ -154,28 +168,37 @@ function createDrillEngine(container, opts) {
       if (currentSessionStreak > bestSessionStreak) bestSessionStreak = currentSessionStreak;
     } else {
       currentSessionStreak = 0;
+      /* In review mode, re-queue incorrect questions at the end so users
+         cycle through remaining mistakes before seeing the same one again.
+         Cap at 2x original count to prevent infinite loops. */
+      if (reviewMode && count < reviewOriginalCount * 2) {
+        questions.push({ question: q.question, answer: q.answer, category: q.category });
+        count++;
+      }
     }
 
     /* Record answer with response time and question data for mistake tracking */
     recordAnswer(correct, q.category, q, elapsedRounded);
 
     /* Provide optional haptic/sound feedback */
-    if (correct && typeof navigator.vibrate === 'function') {
-      try {
-        var settings = JSON.parse(localStorage.getItem('quant_reflex_settings') || '{}');
-        if (settings.vibration !== false) navigator.vibrate(50);
-      } catch (_) { /* ignore */ }
-    }
-    if (!correct) {
+    if (correct) {
+      if (typeof triggerHaptic === 'function') triggerHaptic(50);
+    } else {
       SoundEngine.play('wrongAnswer');
+      if (typeof triggerHaptic === 'function') triggerHaptic([40, 30, 40]);
     }
 
     var feedback = container.querySelector('#feedback');
     feedback.textContent = correct ? '✓ Correct!' : '✗ Answer: ' + expected;
     feedback.className = 'feedback ' + (correct ? 'correct' : 'wrong');
 
-    /* Add animation class */
+    /* Add animation class — shake on wrong, pop on correct */
     feedback.classList.add('feedback-anim');
+    if (!correct) {
+      var card = container.querySelector('.card');
+      if (card) card.classList.add('feedback-shake');
+      setTimeout(function () { if (card) card.classList.remove('feedback-shake'); }, 400);
+    }
 
     /* Replace submit with next */
     var submitBtn = container.querySelector('#submitBtn');
@@ -197,6 +220,8 @@ function createDrillEngine(container, opts) {
   }
 
   function nextQuestion() {
+    /* Clear any pending auto-advance timer to prevent stale callbacks */
+    if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
     current++;
     if (current < count) {
       renderQuestion();
@@ -207,7 +232,10 @@ function createDrillEngine(container, opts) {
 
   function finish() {
     cleanup();
+    hideCustomNumpad();
     SoundEngine.play('drillEnd');
+    /* Haptic feedback on drill completion */
+    if (typeof triggerHaptic === 'function') triggerHaptic([50, 50, 100]);
 
     /* Record session type */
     if (timeLimit) {
@@ -323,6 +351,7 @@ function createDrillEngine(container, opts) {
         if (typeof FirestoreSync !== 'undefined') {
           FirestoreSync.endDrillBatch();
         }
+        hideCustomNumpad();
         container.innerHTML =
           '<div class="card center-content">' +
             '<h2>No Mistakes to Review</h2>' +
@@ -335,6 +364,7 @@ function createDrillEngine(container, opts) {
         return;
       }
       count = questions.length; /* May be less than requested */
+      reviewOriginalCount = count;
     } else {
       questions = generateQuestions(count, category); /* questions.js */
     }

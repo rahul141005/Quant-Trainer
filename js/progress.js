@@ -41,6 +41,16 @@ function loadProgress() {
       if (!data.mistakes) data.mistakes = [];
       if (!data.responseTimes) data.responseTimes = [];
       if (!data.dailyHistory) data.dailyHistory = {};
+      /* Sanitize numeric fields — protect against NaN/undefined corruption */
+      data.totalAttempted = parseInt(data.totalAttempted) || 0;
+      data.totalCorrect = parseInt(data.totalCorrect) || 0;
+      data.bestStreak = parseInt(data.bestStreak) || 0;
+      data.currentStreak = parseInt(data.currentStreak) || 0;
+      data.drillSessions = parseInt(data.drillSessions) || 0;
+      data.timedTestSessions = parseInt(data.timedTestSessions) || 0;
+      data.dailyStreak = parseInt(data.dailyStreak) || 0;
+      data.todayAttempted = parseInt(data.todayAttempted) || 0;
+      data.todayCorrect = parseInt(data.todayCorrect) || 0;
       return data;
     }
   } catch (_) {
