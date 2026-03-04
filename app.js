@@ -32,13 +32,17 @@ window.addEventListener('beforeinstallprompt', function (e) {
   e.preventDefault();
   deferredPrompt = e;
 
-  /* Show an install button if one exists on the current page */
+  /* Show the install card on the Settings page */
+  var installCard = document.getElementById('installCard');
   var btn = document.getElementById('installBtn');
-  if (btn) {
-    btn.hidden = false;
+  if (installCard && btn) {
+    installCard.style.display = 'block';
     btn.addEventListener('click', function () {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.hidden = true; });
+      deferredPrompt.userChoice.then(function () {
+        deferredPrompt = null;
+        installCard.style.display = 'none';
+      });
     });
   }
 });
