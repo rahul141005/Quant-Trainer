@@ -69,14 +69,14 @@ function genFraction() {
 
 /** Percentage calculations: x% of y with randomized values */
 function genPercentage() {
+  /* Use compatible pairs that always produce whole-number results */
   var p = pick([5, 10, 12, 15, 20, 25, 30, 40, 50, 60, 75]);
-  var b = randInt(2, 20) * pick([10, 25, 50]);
-  var result = (p / 100) * b;
-  /* Ensure whole-number result for clean mental math */
-  if (result !== Math.floor(result)) {
-    b = randInt(2, 10) * 100;
+  var b, result;
+  /* Generate base values until we get a whole-number result */
+  do {
+    b = randInt(2, 20) * pick([10, 20, 25, 50, 100]);
     result = (p / 100) * b;
-  }
+  } while (result !== Math.floor(result));
   return { question: p + '% of ' + b + ' = ?', answer: result, category: 'percentages' };
 }
 

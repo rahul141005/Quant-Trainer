@@ -66,7 +66,7 @@ function getFormulaSections() {
         '<p class="formula-text">Ratio = (Higher − Mean) : (Mean − Lower)</p>' +
         '<p class="secondary-text">Used for mixture problems to find the ratio of mixing.</p>' +
         '<h4>Quick Example</h4>' +
-        '<p class="formula-text">Mix ₹40/kg and ₹60/kg to get ₹45/kg → Ratio = 15:5 = 3:1</p>'
+        '<p class="formula-text">Mix ₹40/kg and ₹60/kg to get ₹45/kg → (60−45):(45−40) = 15:5 = 3:1</p>'
     },
     {
       title: '📈 Averages',

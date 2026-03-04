@@ -146,7 +146,7 @@
       for (var n = 1; n <= 30; n++) {
         var item = document.createElement('div');
         item.className = 'math-grid-item';
-        item.innerHTML = '<span class="math-expr">' + padNum(n, 2) + '²</span><span class="math-eq">=</span><span class="math-val">' + padNum(n * n, 3) + '</span>';
+        item.innerHTML = '<span class="math-expr">' + padTableNum(n, 2) + '²</span><span class="math-eq">=</span><span class="math-val">' + padTableNum(n * n, 3) + '</span>';
         sqGrid.appendChild(item);
       }
 
@@ -155,7 +155,7 @@
       for (n = 1; n <= 20; n++) {
         var item2 = document.createElement('div');
         item2.className = 'math-grid-item';
-        item2.innerHTML = '<span class="math-expr">' + padNum(n, 2) + '³</span><span class="math-eq">=</span><span class="math-val">' + padNum(n * n * n, 4) + '</span>';
+        item2.innerHTML = '<span class="math-expr">' + padTableNum(n, 2) + '³</span><span class="math-eq">=</span><span class="math-val">' + padTableNum(n * n * n, 4) + '</span>';
         cuGrid.appendChild(item2);
       }
 
@@ -183,12 +183,6 @@
       }
     })();
 
-    /* Helper: pad number with spaces for alignment */
-    function padNum(n, width) {
-      var s = String(n);
-      while (s.length < width) s = '\u00A0' + s;
-      return s;
-    }
   </script>
   <script src="app.js"></script>
 </body>
