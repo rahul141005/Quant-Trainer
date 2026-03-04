@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
           var header = target.querySelector('.collapsible-header');
           if (header) {
             var content = header.nextElementSibling;
-            if (content && content.style.display === 'none') {
+            if (content && window.getComputedStyle(content).display === 'none') {
               toggleSection(header);
             }
           }
@@ -303,7 +303,7 @@ function initLearnView() {
         var header = target.querySelector('.collapsible-header');
         if (header) {
           var content = header.nextElementSibling;
-          if (content && content.style.display === 'none') {
+          if (content && window.getComputedStyle(content).display === 'none') {
             toggleSection(header);
           }
         }
@@ -375,8 +375,8 @@ function renderStatsView() {
       '<div class="stat-card"><div class="value">' + (p.dailyStreak || 0) + '</div><div class="label">Daily Streak 🔥</div></div>' +
       '<div class="stat-card"><div class="value">' + (p.todayAttempted || 0) + '</div><div class="label">Today\'s Questions</div></div>' +
       '<div class="stat-card"><div class="value">' + (avgTime || '—') + 's</div><div class="label">Avg Response Time</div></div>' +
-      '<div class="stat-card' + (weakest ? ' highlight' : '') + '"><div class="value" style="font-size:1rem;">' + (weakest || '—') + '</div><div class="label">Weakest Category</div></div>' +
-      '<div class="stat-card' + (strongest ? ' highlight' : '') + '"><div class="value" style="font-size:1rem;">' + (strongest || '—') + '</div><div class="label">Strongest Category</div></div>' +
+      '<div class="stat-card' + (weakest ? ' highlight' : '') + '"><div class="value value-sm">' + (weakest || '—') + '</div><div class="label">Weakest Category</div></div>' +
+      '<div class="stat-card' + (strongest ? ' highlight' : '') + '"><div class="value value-sm">' + (strongest || '—') + '</div><div class="label">Strongest Category</div></div>' +
       '<div class="stat-card"><div class="value">' + ((p.mistakes || []).length) + '</div><div class="label">Mistakes Logged</div></div>';
   }
 

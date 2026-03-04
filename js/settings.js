@@ -75,7 +75,7 @@ function initSettingsView() {
   var dailyGoalInput = document.getElementById('dailyGoalInput');
   if (dailyGoalInput) {
     dailyGoalInput.value = settings.dailyGoal || 50;
-    dailyGoalInput = rebind(dailyGoalInput, 'change', function () {
+    rebind(dailyGoalInput, 'change', function () {
       var val = parseInt(this.value);
       if (val >= 10 && val <= 500) {
         settings.dailyGoal = val;
