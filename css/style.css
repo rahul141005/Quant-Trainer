@@ -448,7 +448,7 @@ header h1 {
 }
 .table-card .math-table td,
 .table-card .shortcut-table td {
-  font-size: .78rem;
+  font-size: .75rem;
   padding: .2rem .25rem;
   white-space: nowrap;
   overflow: hidden;

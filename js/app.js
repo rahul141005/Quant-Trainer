@@ -73,6 +73,9 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---- Swipe gesture navigation between views ---- */
   (function () {
     var viewOrder = ['home', 'practice', 'learn', 'stats', 'settings'];
+    var MIN_SWIPE_DISTANCE = 70;
+    var HORIZONTAL_VERTICAL_RATIO = 2;
+    var MAX_SWIPE_DURATION = 400;
     var touchStartX = 0;
     var touchStartY = 0;
     var touchStartTime = 0;
@@ -94,11 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var dy = touch.clientY - touchStartY;
       var elapsed = Date.now() - touchStartTime;
 
-      /* Require intentional horizontal swipe:
-         - horizontal distance > 70px
-         - horizontal distance > 2x vertical distance
-         - completed within 400ms */
-      if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 2 || elapsed > 400) return;
+      if (Math.abs(dx) < MIN_SWIPE_DISTANCE || Math.abs(dx) < Math.abs(dy) * HORIZONTAL_VERTICAL_RATIO || elapsed > MAX_SWIPE_DURATION) return;
 
       /* Don't swipe during active drill */
       if (_activeDrillEngine) return;
