@@ -12,6 +12,23 @@
 /* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Disable text selection globally for native app feel */
+*, *::before, *::after {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* Allow text selection in input fields and textareas */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 html {
   font-size: 16px;
   -webkit-tap-highlight-color: transparent;
@@ -129,6 +146,13 @@ header h1 {
   font-size: .88rem;
   color: #64748b;
   line-height: 1.4;
+}
+
+/* Prevent 300ms tap delay on interactive elements */
+a, button, input, select, textarea, label, .btn, .mode-card, .category-btn,
+.table-select-btn, .learn-jump-btn, .study-card, .quick-link-option,
+.bottom-nav a, .collapsible-header {
+  touch-action: manipulation;
 }
 
 /* ---- Buttons ---- */
