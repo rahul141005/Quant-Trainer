@@ -77,7 +77,7 @@ function createDrillEngine(container, opts) {
     /* Use original count for progress display in review mode to avoid
        confusing jumps when wrong answers add questions to the queue */
     var displayCount = reviewMode && reviewOriginalCount > 0 ? reviewOriginalCount : count;
-    var progressPct = Math.min(100, Math.round(((current) / displayCount) * 100));
+    var progressPct = displayCount > 0 ? Math.min(100, Math.round(((current) / displayCount) * 100)) : 0;
     container.innerHTML =
       '<div class="card center-content fade-in">' +
         '<p class="drill-progress">Question ' + (current + 1) + ' / ' + displayCount + '</p>' +
