@@ -1522,3 +1522,81 @@ body.dark-mode .clear-option-info strong {
 body.dark-mode .clear-option-info span {
   color: #94a3b8;
 }
+
+/* ---- Custom Numpad ---- */
+.custom-numpad {
+  position: fixed;
+  bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  padding: .5rem;
+  z-index: 99;
+  display: none;
+}
+.custom-numpad.visible {
+  display: block;
+}
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .4rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.numpad-btn {
+  min-height: 48px;
+  border: none;
+  border-radius: .6rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .1s ease, transform .1s ease;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.numpad-btn:active {
+  background: #e2e8f0;
+  transform: scale(.95);
+}
+.numpad-btn.numpad-submit {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+}
+.numpad-btn.numpad-submit:active {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+.numpad-btn.numpad-backspace {
+  font-size: 1.1rem;
+}
+
+/* Dark mode numpad */
+body.dark-mode .custom-numpad {
+  background: #1e293b;
+  border-top-color: #334155;
+}
+body.dark-mode .numpad-btn {
+  background: #334155;
+  color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+body.dark-mode .numpad-btn:active {
+  background: #475569;
+}
+body.dark-mode .numpad-btn.numpad-submit {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+}
+
+/* When numpad is visible, add bottom padding to body to prevent content overlap */
+body.numpad-active {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px) + 14rem);
+}

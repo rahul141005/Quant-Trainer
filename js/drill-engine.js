@@ -66,6 +66,7 @@ function createDrillEngine(container, opts) {
         '<p>' + subtitle + '</p>' +
         '<button id="startBtn" class="btn accent">START</button>' +
       '</div>';
+    hideCustomNumpad();
     container.querySelector('#startBtn').addEventListener('click', begin);
   }
 
@@ -80,7 +81,7 @@ function createDrillEngine(container, opts) {
         (timeLimit ? '<p id="globalTimer" class="timer"></p>' : '') +
         (perQLimit ? '<p id="perQTimer" class="timer"></p>' : '') +
         '<h2 class="question-text">' + q.question + '</h2>' +
-        '<input id="answerInput" class="input" type="text" inputmode="decimal" autocomplete="off" placeholder="Your answer" />' +
+        '<input id="answerInput" class="input" type="text" inputmode="none" autocomplete="off" placeholder="Your answer" readonly />' +
         '<div id="feedback" class="feedback"></div>' +
         '<button id="submitBtn" class="btn accent">Submit</button>' +
       '</div>';
@@ -102,6 +103,11 @@ function createDrillEngine(container, opts) {
     });
 
     qStart = performance.now();
+
+    /* Show custom numpad */
+    showCustomNumpad(input, function() {
+      if (!answered) checkAnswer(input.value.trim());
+    });
 
     /* Per-question timer */
     if (perQLimit) {
@@ -207,6 +213,7 @@ function createDrillEngine(container, opts) {
 
   function finish() {
     cleanup();
+    hideCustomNumpad();
     SoundEngine.play('drillEnd');
 
     /* Record session type */
@@ -323,6 +330,7 @@ function createDrillEngine(container, opts) {
         if (typeof FirestoreSync !== 'undefined') {
           FirestoreSync.endDrillBatch();
         }
+        hideCustomNumpad();
         container.innerHTML =
           '<div class="card center-content">' +
             '<h2>No Mistakes to Review</h2>' +

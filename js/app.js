@@ -315,6 +315,49 @@ function initSwipeNavigation() {
   }, { passive: true });
 }
 
+/* ---- Custom Numpad Controller ---- */
+var _numpadInput = null;
+var _numpadSubmitCb = null;
+
+function showCustomNumpad(inputEl, submitCallback) {
+  _numpadInput = inputEl;
+  _numpadSubmitCb = submitCallback;
+  var numpad = document.getElementById('customNumpad');
+  if (numpad) {
+    numpad.classList.add('visible');
+    document.body.classList.add('numpad-active');
+  }
+}
+
+function hideCustomNumpad() {
+  _numpadInput = null;
+  _numpadSubmitCb = null;
+  var numpad = document.getElementById('customNumpad');
+  if (numpad) {
+    numpad.classList.remove('visible');
+    document.body.classList.remove('numpad-active');
+  }
+}
+
+(function initNumpad() {
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-numpad]');
+    if (!btn || !_numpadInput) return;
+    var key = btn.getAttribute('data-numpad');
+
+    if (key === 'submit') {
+      if (_numpadSubmitCb) _numpadSubmitCb();
+    } else if (key === 'backspace') {
+      _numpadInput.value = _numpadInput.value.slice(0, -1);
+    } else {
+      _numpadInput.value += key;
+    }
+
+    /* Keep input focused for visual feedback */
+    _numpadInput.focus();
+  });
+})();
+
 /* ---- Initialize SPA when DOM is ready ---- */
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('loaded');
@@ -471,6 +514,8 @@ document.addEventListener('DOMContentLoaded', function () {
         _activeDrillEngine.cleanup();
         _activeDrillEngine = null;
       }
+      /* Hide numpad when navigating */
+      hideCustomNumpad();
       SoundEngine.play('tabSwitch');
       Router.showView(view);
     });
@@ -548,6 +593,8 @@ document.addEventListener('DOMContentLoaded', function () {
       _activeDrillEngine.cleanup();
       _activeDrillEngine = null;
     }
+    /* Hide custom numpad when returning to practice mode select */
+    hideCustomNumpad();
     /* Reset practice view state */
     var modeSelect = document.getElementById('modeSelect');
     var categorySelect = document.getElementById('categorySelect');
