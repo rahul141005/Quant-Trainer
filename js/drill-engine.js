@@ -1,5 +1,5 @@
 /**
- * drill-engine.js — Core drill / test engine
+ * drill-engine.js — Core drill / test engine (SPA compatible)
  *
  * Manages: question display, answer checking, per-question timer,
  *          scoring, streak tracking, and results summary.
@@ -9,6 +9,7 @@
  *   - Reflex Drill:  10 questions, per-question timer (15s)
  *   - Timed Test:    10 questions, 180s overall limit
  *   - Focus Training: 10 questions from a specific category
+ *   - Review Mistakes: review previously wrong questions
  *
  * Usage:
  *   var engine = createDrillEngine(container, { count, timeLimitSec, perQuestionSec, category, mode });
@@ -25,8 +26,9 @@
  * @param {number|null} opts.perQuestionSec  - per-question time limit in seconds (null = unlimited)
  * @param {string|null} opts.category        - question category filter (null = all)
  * @param {string}      opts.mode            - drill mode label for display
- * @param {string}      opts.returnUrl       - URL to return to after drill (default: practice.html)
- * @returns {object} engine with .start() method
+ * @param {boolean}     opts.reviewMode      - if true, use mistake review questions
+ * @param {function}    opts.onFinish        - callback when drill finishes (for SPA navigation)
+ * @returns {object} engine with .start() and .cleanup() methods
  */
 function createDrillEngine(container, opts) {
   var count = opts.count || 10;
@@ -34,7 +36,8 @@ function createDrillEngine(container, opts) {
   var perQLimit = opts.perQuestionSec || null;
   var category = opts.category || null;
   var mode = opts.mode || 'Drill';
-  var returnUrl = opts.returnUrl || 'practice.html';
+  var reviewMode = opts.reviewMode || false;
+  var onFinish = opts.onFinish || null;
 
   var questions = [];
   var current = 0;
@@ -51,14 +54,15 @@ function createDrillEngine(container, opts) {
   /* ---- render helpers ---- */
 
   function renderStart() {
+    var subtitle = count + ' questions';
+    if (timeLimit) subtitle += ' · ' + timeLimit + 's time limit';
+    if (perQLimit) subtitle += ' · ' + perQLimit + 's per question';
+    if (category) subtitle += ' · ' + category;
+
     container.innerHTML =
       '<div class="card center-content">' +
         '<h2>' + mode + '</h2>' +
-        '<p>' + count + ' questions' +
-          (timeLimit ? ' · ' + timeLimit + 's time limit' : '') +
-          (perQLimit ? ' · ' + perQLimit + 's per question' : '') +
-          (category ? ' · ' + category : '') +
-        '</p>' +
+        '<p>' + subtitle + '</p>' +
         '<button id="startBtn" class="btn accent">START</button>' +
       '</div>';
     container.querySelector('#startBtn').addEventListener('click', begin);
@@ -67,9 +71,11 @@ function createDrillEngine(container, opts) {
   function renderQuestion() {
     answered = false;
     var q = questions[current];
+    var progressPct = Math.round(((current) / count) * 100);
     container.innerHTML =
       '<div class="card center-content fade-in">' +
         '<p class="drill-progress">Question ' + (current + 1) + ' / ' + count + '</p>' +
+        '<div class="drill-progress-bar"><div class="drill-progress-fill" style="width:' + progressPct + '%"></div></div>' +
         (timeLimit ? '<p id="globalTimer" class="timer"></p>' : '') +
         (perQLimit ? '<p id="perQTimer" class="timer"></p>' : '') +
         '<h2 class="question-text">' + q.question + '</h2>' +
@@ -86,7 +92,12 @@ function createDrillEngine(container, opts) {
       if (!answered) checkAnswer(input.value.trim());
     }
     submitBtn.addEventListener('click', submit);
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      }
+    });
 
     qStart = performance.now();
 
@@ -102,12 +113,25 @@ function createDrillEngine(container, opts) {
 
     if (perQTimer) { clearInterval(perQTimer); perQTimer = null; }
 
-    var elapsed = ((performance.now() - qStart) / 1000).toFixed(1);
-    perQuestionTimes.push(parseFloat(elapsed));
+    var elapsed = ((performance.now() - qStart) / 1000);
+    var elapsedRounded = parseFloat(elapsed.toFixed(1));
+    perQuestionTimes.push(elapsedRounded);
 
     var q = questions[current];
     var expected = String(q.answer);
-    var correct = raw === expected;
+
+    /* Normalize both values for comparison:
+       - trim whitespace
+       - handle numeric equivalence (e.g. "57.0" == "57", "3234.00" == "3234") */
+    var normalizedRaw = raw.replace(/\s/g, '');
+    var normalizedExpected = expected.replace(/\s/g, '');
+    var correct = false;
+
+    if (normalizedRaw === normalizedExpected) {
+      correct = true;
+    } else if (normalizedRaw !== '' && !isNaN(normalizedRaw) && !isNaN(normalizedExpected)) {
+      correct = parseFloat(normalizedRaw) === parseFloat(normalizedExpected);
+    }
 
     if (correct) {
       score++;
@@ -117,7 +141,8 @@ function createDrillEngine(container, opts) {
       currentSessionStreak = 0;
     }
 
-    recordAnswer(correct, q.category); /* progress.js — pass category */
+    /* Record answer with response time and question data for mistake tracking */
+    recordAnswer(correct, q.category, q, elapsedRounded);
 
     /* Provide optional haptic/sound feedback */
     if (correct && typeof navigator.vibrate === 'function') {
@@ -131,10 +156,17 @@ function createDrillEngine(container, opts) {
     feedback.textContent = correct ? '✓ Correct!' : '✗ Answer: ' + expected;
     feedback.className = 'feedback ' + (correct ? 'correct' : 'wrong');
 
+    /* Add animation class */
+    feedback.classList.add('feedback-anim');
+
     /* Replace submit with next */
     var submitBtn = container.querySelector('#submitBtn');
     submitBtn.textContent = current + 1 < count ? 'Next →' : 'See Results';
     submitBtn.onclick = nextQuestion;
+
+    /* Focus next button for keyboard navigation */
+    submitBtn.focus();
+
     container.querySelector('#answerInput').disabled = true;
   }
 
@@ -148,8 +180,7 @@ function createDrillEngine(container, opts) {
   }
 
   function finish() {
-    if (overallTimer) clearInterval(overallTimer);
-    if (perQTimer) clearInterval(perQTimer);
+    cleanup();
 
     /* Record session type */
     if (timeLimit) {
@@ -164,9 +195,18 @@ function createDrillEngine(container, opts) {
       : '0';
     var accuracy = ((score / count) * 100).toFixed(0);
 
+    /* Performance badge */
+    var badgeText, badgeClass;
+    var accNum = parseFloat(accuracy);
+    if (accNum >= 90) { badgeText = '🏆 Excellent'; badgeClass = 'badge-excellent'; }
+    else if (accNum >= 75) { badgeText = '👍 Good'; badgeClass = 'badge-good'; }
+    else if (accNum >= 50) { badgeText = '📝 Needs Practice'; badgeClass = 'badge-practice'; }
+    else { badgeText = '💪 Keep Trying'; badgeClass = 'badge-weak'; }
+
     container.innerHTML =
       '<div class="card center-content fade-in">' +
         '<h2>Results</h2>' +
+        '<div class="performance-badge ' + badgeClass + '">' + badgeText + '</div>' +
         '<div class="results-grid">' +
           '<div class="result-item"><span class="result-value">' + score + '/' + count + '</span><span class="result-label">Score</span></div>' +
           '<div class="result-item"><span class="result-value">' + accuracy + '%</span><span class="result-label">Accuracy</span></div>' +
@@ -174,9 +214,24 @@ function createDrillEngine(container, opts) {
           '<div class="result-item"><span class="result-value">' + bestSessionStreak + '</span><span class="result-label">Best Streak</span></div>' +
           '<div class="result-item"><span class="result-value">' + totalTime + 's</span><span class="result-label">Total Time</span></div>' +
         '</div>' +
-        '<a href="' + returnUrl + '" class="btn accent">Try Again</a>' +
-        '<a href="index.html" class="btn">Home</a>' +
+        '<button class="btn accent" id="tryAgainBtn">Try Again</button>' +
+        '<button class="btn" id="homeBtn">Home</button>' +
       '</div>';
+
+    container.querySelector('#tryAgainBtn').addEventListener('click', function () {
+      if (onFinish) {
+        onFinish('practice');
+      } else {
+        Router.showView('practice');
+      }
+    });
+    container.querySelector('#homeBtn').addEventListener('click', function () {
+      if (onFinish) {
+        onFinish('home');
+      } else {
+        Router.showView('home');
+      }
+    });
   }
 
   /* ---- global timer (for timed tests) ---- */
@@ -185,9 +240,9 @@ function createDrillEngine(container, opts) {
     if (!timeLimit) return;
     var remaining = timeLimit;
     function tick() {
-      var el = document.getElementById('globalTimer');
+      var el = container.querySelector('#globalTimer');
       if (el) el.textContent = '⏱ ' + remaining + 's';
-      if (remaining <= 0) { clearInterval(overallTimer); finish(); return; }
+      if (remaining <= 0) { clearInterval(overallTimer); overallTimer = null; finish(); return; }
       remaining--;
     }
     tick();
@@ -199,7 +254,7 @@ function createDrillEngine(container, opts) {
   function startPerQTimer() {
     var remaining = perQLimit;
     function tick() {
-      var el = document.getElementById('perQTimer');
+      var el = container.querySelector('#perQTimer');
       if (el) el.textContent = '⏱ ' + remaining + 's';
       if (remaining <= 0) {
         clearInterval(perQTimer);
@@ -214,10 +269,33 @@ function createDrillEngine(container, opts) {
     perQTimer = setInterval(tick, 1000);
   }
 
+  /* ---- cleanup timers ---- */
+  function cleanup() {
+    if (overallTimer) { clearInterval(overallTimer); overallTimer = null; }
+    if (perQTimer) { clearInterval(perQTimer); perQTimer = null; }
+  }
+
   /* ---- begin drill ---- */
 
   function begin() {
-    questions = generateQuestions(count, category); /* questions.js */
+    if (reviewMode) {
+      questions = generateMistakeReviewQuestions(count);
+      if (questions.length === 0) {
+        container.innerHTML =
+          '<div class="card center-content">' +
+            '<h2>No Mistakes to Review</h2>' +
+            '<p class="secondary-text">Great job! You have no wrong answers to review.</p>' +
+            '<button class="btn accent" id="backToPractice">Back to Practice</button>' +
+          '</div>';
+        container.querySelector('#backToPractice').addEventListener('click', function () {
+          Router.showView('practice');
+        });
+        return;
+      }
+      count = questions.length; /* May be less than requested */
+    } else {
+      questions = generateQuestions(count, category); /* questions.js */
+    }
     current = 0;
     score = 0;
     bestSessionStreak = 0;
@@ -229,5 +307,5 @@ function createDrillEngine(container, opts) {
   }
 
   /* ---- public API ---- */
-  return { start: renderStart };
+  return { start: renderStart, cleanup: cleanup };
 }
