@@ -71,9 +71,11 @@ function createDrillEngine(container, opts) {
   function renderQuestion() {
     answered = false;
     var q = questions[current];
+    var progressPct = Math.round(((current) / count) * 100);
     container.innerHTML =
       '<div class="card center-content fade-in">' +
         '<p class="drill-progress">Question ' + (current + 1) + ' / ' + count + '</p>' +
+        '<div class="drill-progress-bar"><div class="drill-progress-fill" style="width:' + progressPct + '%"></div></div>' +
         (timeLimit ? '<p id="globalTimer" class="timer"></p>' : '') +
         (perQLimit ? '<p id="perQTimer" class="timer"></p>' : '') +
         '<h2 class="question-text">' + q.question + '</h2>' +
@@ -181,9 +183,18 @@ function createDrillEngine(container, opts) {
       : '0';
     var accuracy = ((score / count) * 100).toFixed(0);
 
+    /* Performance badge */
+    var badgeText, badgeClass;
+    var accNum = parseFloat(accuracy);
+    if (accNum >= 90) { badgeText = '🏆 Excellent'; badgeClass = 'badge-excellent'; }
+    else if (accNum >= 75) { badgeText = '👍 Good'; badgeClass = 'badge-good'; }
+    else if (accNum >= 50) { badgeText = '📝 Needs Practice'; badgeClass = 'badge-practice'; }
+    else { badgeText = '💪 Keep Trying'; badgeClass = 'badge-weak'; }
+
     container.innerHTML =
       '<div class="card center-content fade-in">' +
         '<h2>Results</h2>' +
+        '<div class="performance-badge ' + badgeClass + '">' + badgeText + '</div>' +
         '<div class="results-grid">' +
           '<div class="result-item"><span class="result-value">' + score + '/' + count + '</span><span class="result-label">Score</span></div>' +
           '<div class="result-item"><span class="result-value">' + accuracy + '%</span><span class="result-label">Accuracy</span></div>' +

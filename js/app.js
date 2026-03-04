@@ -74,6 +74,30 @@ document.addEventListener('DOMContentLoaded', function () {
         '<div class="stat-card"><div class="value">' + (p.currentStreak || 0) + '</div><div class="label">Current Streak</div></div>' +
         '<div class="stat-card"><div class="value">' + (p.bestStreak || 0) + '</div><div class="label">Best Streak</div></div>';
     }
+
+    /* Daily goal card */
+    var settings = loadSettings();
+    var goal = settings.dailyGoal || 50;
+    var done = p.todayAttempted || 0;
+    var pct = Math.min(100, Math.round((done / goal) * 100));
+    var goalDone = document.getElementById('goalDone');
+    var goalTarget = document.getElementById('goalTarget');
+    var goalFill = document.getElementById('goalFill');
+    var goalStatus = document.getElementById('goalStatus');
+    var goalPct = document.getElementById('goalPct');
+    if (goalDone) goalDone.textContent = done;
+    if (goalTarget) goalTarget.textContent = goal;
+    if (goalFill) {
+      goalFill.style.width = pct + '%';
+      goalFill.className = 'goal-progress-fill' + (pct >= 100 ? ' goal-met' : '');
+    }
+    if (goalPct) goalPct.textContent = pct + '%';
+    if (goalStatus) {
+      if (pct >= 100) goalStatus.textContent = '🎉 Goal completed!';
+      else if (pct >= 75) goalStatus.textContent = '🔥 Almost there!';
+      else if (pct >= 50) goalStatus.textContent = '💪 Halfway done!';
+      else goalStatus.textContent = 'Keep going!';
+    }
   });
 
   /* ---- HOME VIEW: study card and warmup click handlers ---- */
@@ -268,6 +292,26 @@ function initLearnView() {
     }
   }
 
+  /* Quick jump navigation */
+  var jumpBtns = document.querySelectorAll('.learn-jump-btn');
+  for (var j = 0; j < jumpBtns.length; j++) {
+    jumpBtns[j].addEventListener('click', function () {
+      var targetId = this.getAttribute('data-jump');
+      var target = document.getElementById(targetId);
+      if (target) {
+        /* Expand collapsible if needed */
+        var header = target.querySelector('.collapsible-header');
+        if (header) {
+          var content = header.nextElementSibling;
+          if (content && content.style.display === 'none') {
+            toggleSection(header);
+          }
+        }
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
   /* Learn search functionality */
   var searchInput = document.getElementById('learnSearch');
   if (searchInput) {
@@ -331,12 +375,12 @@ function renderStatsView() {
       '<div class="stat-card"><div class="value">' + (p.dailyStreak || 0) + '</div><div class="label">Daily Streak 🔥</div></div>' +
       '<div class="stat-card"><div class="value">' + (p.todayAttempted || 0) + '</div><div class="label">Today\'s Questions</div></div>' +
       '<div class="stat-card"><div class="value">' + (avgTime || '—') + 's</div><div class="label">Avg Response Time</div></div>' +
-      '<div class="stat-card"><div class="value">' + (weakest || '—') + '</div><div class="label">Weakest Category</div></div>' +
-      '<div class="stat-card"><div class="value">' + (strongest || '—') + '</div><div class="label">Strongest Category</div></div>' +
+      '<div class="stat-card' + (weakest ? ' highlight' : '') + '"><div class="value" style="font-size:1rem;">' + (weakest || '—') + '</div><div class="label">Weakest Category</div></div>' +
+      '<div class="stat-card' + (strongest ? ' highlight' : '') + '"><div class="value" style="font-size:1rem;">' + (strongest || '—') + '</div><div class="label">Strongest Category</div></div>' +
       '<div class="stat-card"><div class="value">' + ((p.mistakes || []).length) + '</div><div class="label">Mistakes Logged</div></div>';
   }
 
-  /* Category stats */
+  /* Category stats with color-coded bars */
   var catContainer = document.getElementById('categoryStats');
   if (!catContainer) return;
   var cats = p.categoryStats || {};
@@ -346,17 +390,30 @@ function renderStatsView() {
     return;
   }
 
+  /* Sort by accuracy ascending so weak categories appear first */
+  keys.sort(function (a, b) {
+    var accA = cats[a].attempted ? (cats[a].correct / cats[a].attempted) : 0;
+    var accB = cats[b].attempted ? (cats[b].correct / cats[b].attempted) : 0;
+    return accA - accB;
+  });
+
   var html = '<div class="category-stats-list">';
   for (var i = 0; i < keys.length; i++) {
     var cat = keys[i];
     var cs = cats[cat];
     var catAcc = cs.attempted ? ((cs.correct / cs.attempted) * 100).toFixed(0) : '0';
     var barWidth = cs.attempted ? Math.round((cs.correct / cs.attempted) * 100) : 0;
+    /* Color-coded bar class */
+    var barClass = 'cat-bar ';
+    if (barWidth >= 85) barClass += 'cat-bar-high';
+    else if (barWidth >= 65) barClass += 'cat-bar-mid';
+    else if (barWidth >= 40) barClass += 'cat-bar-low';
+    else barClass += 'cat-bar-weak';
     html +=
       '<div class="category-stat-row">' +
         '<span class="cat-name">' + cat + '</span>' +
         '<div class="cat-bar-container">' +
-          '<div class="cat-bar" style="width:' + barWidth + '%"></div>' +
+          '<div class="' + barClass + '" style="width:' + barWidth + '%"></div>' +
         '</div>' +
         '<span class="cat-accuracy">' + catAcc + '%</span>' +
       '</div>';

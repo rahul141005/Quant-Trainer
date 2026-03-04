@@ -12,7 +12,7 @@ function loadSettings() {
     var raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) return JSON.parse(raw);
   } catch (_) { /* ignore */ }
-  return { darkMode: false, sound: true, vibration: true, difficulty: 'medium' };
+  return { darkMode: false, sound: true, vibration: true, difficulty: 'medium', dailyGoal: 50 };
 }
 
 function saveSettings(s) {
@@ -70,6 +70,19 @@ function initSettingsView() {
     settings.difficulty = this.value;
     saveSettings(settings);
   });
+
+  /* Daily goal input */
+  var dailyGoalInput = document.getElementById('dailyGoalInput');
+  if (dailyGoalInput) {
+    dailyGoalInput.value = settings.dailyGoal || 50;
+    dailyGoalInput = rebind(dailyGoalInput, 'change', function () {
+      var val = parseInt(this.value);
+      if (val >= 10 && val <= 500) {
+        settings.dailyGoal = val;
+        saveSettings(settings);
+      }
+    });
+  }
 
   /* Reset progress */
   var resetBtn = document.getElementById('resetBtn');

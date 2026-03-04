@@ -31,6 +31,22 @@
         <div class="stat-grid" id="homeStats"></div>
       </div>
 
+      <!-- Daily Goal -->
+      <div class="card goal-card" id="dailyGoalCard">
+        <h3 style="margin-bottom:.25rem;">🎯 Daily Goal</h3>
+        <div style="display:flex;align-items:baseline;gap:.5rem;margin-top:.25rem;">
+          <span class="goal-count" id="goalDone">0</span>
+          <span class="secondary-text">/ <span id="goalTarget">50</span> questions</span>
+        </div>
+        <div class="goal-progress-bar">
+          <div class="goal-progress-fill" id="goalFill" style="width:0%"></div>
+        </div>
+        <div class="goal-text">
+          <span id="goalStatus">Keep going!</span>
+          <span id="goalPct">0%</span>
+        </div>
+      </div>
+
       <!-- Quick Study Cards -->
       <h3 style="margin:1rem 0 .5rem;color:#64748b;font-size:.9rem;">QUICK STUDY</h3>
 
@@ -121,6 +137,16 @@
       <!-- Search -->
       <div class="learn-search-container">
         <input type="text" id="learnSearch" class="learn-search-input" placeholder="🔍 Search topics, formulas, tables..." />
+      </div>
+
+      <!-- Quick Jump Navigation -->
+      <div class="learn-jump-nav" id="learnJumpNav">
+        <button class="learn-jump-btn" data-jump="generalMath">📚 General</button>
+        <button class="learn-jump-btn" data-jump="tablesContainer">✖️ Tables</button>
+        <button class="learn-jump-btn" data-jump="squaresSection">🔢 Squares</button>
+        <button class="learn-jump-btn" data-jump="cubesSection">🧊 Cubes</button>
+        <button class="learn-jump-btn" data-jump="formulaSections">📝 Formulas</button>
+        <button class="learn-jump-btn" data-jump="mentalTricks">💡 Shortcuts</button>
       </div>
 
       <!-- SECTION 1: General Maths -->
@@ -284,6 +310,15 @@
           <option value="medium" selected>Medium</option>
           <option value="hard">Hard</option>
         </select>
+      </div>
+
+      <!-- Daily Goal -->
+      <div class="card settings-row">
+        <div class="settings-label">
+          <h3>🎯 Daily Goal</h3>
+          <p>Set your daily question target</p>
+        </div>
+        <input type="number" id="dailyGoalInput" class="goal-input" min="10" max="500" step="10" value="50" />
       </div>
 
       <!-- Reset Progress -->
