@@ -138,6 +138,8 @@ window.addEventListener('beforeinstallprompt', function (e) {
 
 /* ---- Active drill engine reference for cleanup ---- */
 var _activeDrillEngine = null;
+/* True only while user is actively answering questions (after START pressed) */
+var _drillSessionActive = false;
 
 /* ---- Quick Study Links Configuration ---- */
 var QUICK_LINKS_KEY = 'quant_quick_links';
@@ -375,8 +377,19 @@ function initSwipeNavigation() {
     var currentIndex = viewOrder.indexOf(currentView);
     if (currentIndex === -1) return;
 
-    /* Don't navigate during active drill */
-    if (_activeDrillEngine) return;
+    /* Block swipe during active drill session (after START pressed) */
+    if (_drillSessionActive) return;
+
+    /* On the drill start/preview screen, swipe returns to Practice mode selection */
+    if (_activeDrillEngine) {
+      _activeDrillEngine.cleanup();
+      _activeDrillEngine = null;
+      hideCustomNumpad();
+      SoundEngine.play('tabSwitch');
+      triggerHaptic(10);
+      Router.showView('practice');
+      return;
+    }
 
     var nextIndex;
     if (deltaX > 0) {
@@ -602,6 +615,7 @@ document.addEventListener('DOMContentLoaded', function () {
         _activeDrillEngine.cleanup();
         _activeDrillEngine = null;
       }
+      _drillSessionActive = false;
       /* Hide numpad when navigating */
       hideCustomNumpad();
       SoundEngine.play('tabSwitch');
@@ -612,10 +626,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ---- Cleanup drill engine on back/forward navigation ---- */
   window.addEventListener('popstate', function () {
+    if (_drillSessionActive) {
+      /* Re-push state to keep user on the same page while confirming */
+      history.pushState({ view: 'practice' }, '', '#practice');
+      if (confirm('Exit this session? Your progress will be lost.')) {
+        _drillSessionActive = false;
+        if (_activeDrillEngine) {
+          _activeDrillEngine.cleanup();
+          _activeDrillEngine = null;
+        }
+        hideCustomNumpad();
+        Router.showView('practice');
+      }
+      return;
+    }
     if (_activeDrillEngine) {
       _activeDrillEngine.cleanup();
       _activeDrillEngine = null;
     }
+    hideCustomNumpad();
   });
 
   /* ---- HOME VIEW: render stats on every show ---- */
@@ -682,6 +711,7 @@ document.addEventListener('DOMContentLoaded', function () {
       _activeDrillEngine.cleanup();
       _activeDrillEngine = null;
     }
+    _drillSessionActive = false;
     /* Hide custom numpad when returning to practice mode select */
     hideCustomNumpad();
     /* Reset practice view state */
@@ -782,6 +812,8 @@ function startDrillFromPractice(modeKey, category, categoryLabel) {
       _activeDrillEngine.cleanup();
       _activeDrillEngine = null;
     }
+    _drillSessionActive = false;
+    hideCustomNumpad();
     Router.showView(view);
   };
 

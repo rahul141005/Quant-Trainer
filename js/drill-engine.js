@@ -68,6 +68,7 @@ function createDrillEngine(container, opts) {
         '<button id="startBtn" class="btn accent">START</button>' +
       '</div>';
     hideCustomNumpad();
+    if (typeof _drillSessionActive !== 'undefined') _drillSessionActive = false;
     container.querySelector('#startBtn').addEventListener('click', begin);
   }
 
@@ -83,6 +84,7 @@ function createDrillEngine(container, opts) {
       : count;
     var progressPct = displayCount > 0 ? Math.min(100, Math.round(((current) / displayCount) * 100)) : 0;
     container.innerHTML =
+      '<button class="drill-exit-btn" id="drillExitBtn" aria-label="Exit session">&times;</button>' +
       '<div class="card center-content fade-in">' +
         '<p class="drill-progress">Question ' + (current + 1) + ' / ' + displayCount + '</p>' +
         '<div class="drill-progress-bar"><div class="drill-progress-fill" style="width:' + progressPct + '%"></div></div>' +
@@ -93,6 +95,20 @@ function createDrillEngine(container, opts) {
         '<div id="feedback" class="feedback"></div>' +
         '<button id="submitBtn" class="btn accent">Submit</button>' +
       '</div>';
+
+    /* Exit button handler */
+    container.querySelector('#drillExitBtn').addEventListener('click', function () {
+      if (confirm('Exit this session? Your progress will be lost.')) {
+        cleanup();
+        hideCustomNumpad();
+        if (typeof _drillSessionActive !== 'undefined') _drillSessionActive = false;
+        if (onFinish) {
+          onFinish('practice');
+        } else {
+          Router.showView('practice');
+        }
+      }
+    });
 
     var input = container.querySelector('#answerInput');
     var submitBtn = container.querySelector('#submitBtn');
@@ -233,6 +249,7 @@ function createDrillEngine(container, opts) {
   function finish() {
     cleanup();
     hideCustomNumpad();
+    if (typeof _drillSessionActive !== 'undefined') _drillSessionActive = false;
     SoundEngine.play('drillEnd');
     /* Haptic feedback on drill completion */
     if (typeof triggerHaptic === 'function') triggerHaptic([50, 50, 100]);
@@ -339,6 +356,9 @@ function createDrillEngine(container, opts) {
   /* ---- begin drill ---- */
 
   function begin() {
+    /* Mark session as active for gesture control */
+    if (typeof _drillSessionActive !== 'undefined') _drillSessionActive = true;
+
     /* Begin Firestore write batching during drill */
     if (typeof FirestoreSync !== 'undefined') {
       FirestoreSync.beginDrillBatch();
@@ -347,6 +367,7 @@ function createDrillEngine(container, opts) {
     if (reviewMode) {
       questions = generateMistakeReviewQuestions(count);
       if (questions.length === 0) {
+        if (typeof _drillSessionActive !== 'undefined') _drillSessionActive = false;
         /* End drill batch since no drill will happen */
         if (typeof FirestoreSync !== 'undefined') {
           FirestoreSync.endDrillBatch();

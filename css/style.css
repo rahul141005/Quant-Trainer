@@ -252,6 +252,46 @@ a, button, input, select, textarea, label, .btn, .mode-card, .category-btn,
 .feedback.correct { color: #16a34a; background: rgba(22,163,74,.08); }
 .feedback.wrong   { color: #dc2626; background: rgba(220,38,38,.08); }
 
+/* Drill exit button */
+.drill-exit-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,.06);
+  color: #64748b;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background .15s ease, color .15s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.drill-exit-btn:active {
+  background: rgba(0,0,0,.12);
+  color: #0f172a;
+}
+body.dark-mode .drill-exit-btn {
+  background: rgba(255,255,255,.08);
+  color: #94a3b8;
+}
+body.dark-mode .drill-exit-btn:active {
+  background: rgba(255,255,255,.15);
+  color: #e2e8f0;
+}
+
+/* Ensure drillContainer is position relative for exit button */
+#drillContainer {
+  position: relative;
+}
+
 /* Feedback animation */
 .feedback-anim {
   animation: feedbackPop .35s cubic-bezier(.17,.67,.35,1.2);
@@ -670,6 +710,23 @@ a, button, input, select, textarea, label, .btn, .mode-card, .category-btn,
 }
 
 /* ---- Settings Page ---- */
+.settings-group {
+  margin-bottom: 0;
+}
+.settings-group .card {
+  margin-bottom: .75rem;
+}
+.settings-group .card:last-child {
+  margin-bottom: 0;
+}
+.settings-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 1.25rem 0;
+}
+body.dark-mode .settings-divider {
+  background: #334155;
+}
 .settings-row {
   display: flex;
   justify-content: space-between;
@@ -977,6 +1034,8 @@ body.dark-mode .learn-jump-btn:active {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
