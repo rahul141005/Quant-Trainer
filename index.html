@@ -15,7 +15,15 @@
   <!-- ==================== LOADING INDICATOR ==================== -->
   <div id="appLoader" class="app-loader">
     <div class="app-loader-content">
-      <div class="app-loader-icon">🧠</div>
+      <div class="app-loader-brain">🧠</div>
+      <div class="app-loader-symbols">
+        <span class="floating-symbol" style="--delay:0s;--x:-50px;--y:-70px;--dur:3.5s;">+</span>
+        <span class="floating-symbol" style="--delay:.5s;--x:60px;--y:-50px;--dur:4s;">−</span>
+        <span class="floating-symbol" style="--delay:1s;--x:-65px;--y:40px;--dur:3.8s;">×</span>
+        <span class="floating-symbol" style="--delay:1.5s;--x:55px;--y:60px;--dur:4.2s;">÷</span>
+        <span class="floating-symbol" style="--delay:2s;--x:5px;--y:-80px;--dur:3.6s;">%</span>
+        <span class="floating-symbol" style="--delay:2.5s;--x:-70px;--y:5px;--dur:4.5s;">=</span>
+      </div>
       <div class="app-loader-spinner"></div>
     </div>
   </div>
@@ -60,7 +68,14 @@
           <span class="clear-option-icon">📊</span>
           <div class="clear-option-info">
             <strong>Clear Statistics</strong>
-            <span>Reset all progress, streaks, and performance history</span>
+            <span>Reset all progress and performance history</span>
+          </div>
+        </button>
+        <button class="clear-option-btn" data-clear="streaks">
+          <span class="clear-option-icon">🔥</span>
+          <div class="clear-option-info">
+            <strong>Clear Streaks</strong>
+            <span>Reset current and best streaks</span>
           </div>
         </button>
         <button class="clear-option-btn" data-clear="formulas">
@@ -115,7 +130,7 @@
     <div id="view-home" class="spa-view">
       <header>
         <h1>Quant Reflex Trainer</h1>
-        <p style="color:#64748b;margin-top:.35rem;">Train your mental math speed daily</p>
+        <p id="homeGreeting" class="home-greeting">Train your mental math speed daily</p>
       </header>
 
       <!-- Daily Warmup -->
@@ -185,6 +200,11 @@
         <div class="mode-card" data-mode="review">
           <h3>🔄 Review Mistakes</h3>
           <p>Practice your previously wrong answers</p>
+        </div>
+
+        <div class="mode-card mode-card-teaser" data-mode="wordproblems">
+          <h3>🔒 Word Problems</h3>
+          <p>Coming in a future update.</p>
         </div>
       </div>
 
@@ -337,19 +357,55 @@
 
     <!-- ==================== STATS VIEW ==================== -->
     <div id="view-stats" class="spa-view">
-      <header><h1>📊 Stats</h1></header>
+      <header><h1>📊 Analytics</h1></header>
 
-      <!-- Overall Stats -->
-      <div class="card">
-        <h3 class="section-title">Overall Performance</h3>
-        <div class="stat-grid" id="statsGrid"></div>
+      <!-- Section 1 — Practice Overview -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Practice Overview</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-3" id="statsPracticeOverview"></div>
+        </div>
+      </div>
+
+      <!-- Section 2 — Speed & Efficiency -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Speed &amp; Efficiency</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-2" id="statsSpeed"></div>
+        </div>
+      </div>
+
+      <!-- Section 3 — Activity Stats -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Activity Stats</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-2" id="statsActivity"></div>
+        </div>
+      </div>
+
+      <!-- Section 4 — Consistency -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Consistency</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-2" id="statsConsistency"></div>
+        </div>
+      </div>
+
+      <!-- Section 5 — Performance Insights -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Performance Insights</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-3" id="statsInsights"></div>
+        </div>
       </div>
 
       <!-- Category Performance -->
-      <div class="card">
-        <h3 class="section-title">Category Accuracy</h3>
-        <div id="categoryStats">
-          <p class="secondary-text">Start practicing to see category-wise performance.</p>
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Category Accuracy</h3>
+        <div class="analytics-card">
+          <div id="categoryStats">
+            <p class="secondary-text">Start practicing to see category-wise performance.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -365,116 +421,174 @@
         <button id="installBtn" class="btn accent">Install App</button>
       </div>
 
-      <!-- Section 1: Appearance -->
-      <div class="settings-group">
-        <div class="card settings-row">
-          <div class="settings-label">
-            <h3>🌙 Dark Mode</h3>
-            <p>Switch between light and dark theme</p>
+      <!-- SECTION 1 — Appearance & Personalization -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Appearance &amp; Personalization</h3>
+        <div class="settings-section-card">
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>🌙 Dark Mode</h3>
+              <p>Switch between light and dark theme</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="darkModeToggle" />
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <label class="toggle">
-            <input type="checkbox" id="darkModeToggle" />
-            <span class="toggle-slider"></span>
-          </label>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row settings-row-disabled">
+            <div class="settings-label">
+              <h3>🎨 Themes</h3>
+              <p>Coming soon — customize the look of your trainer.</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="settings-divider"></div>
-
-      <!-- Section 2: Training -->
-      <div class="settings-group">
-        <div class="card">
-          <h3 style="margin-bottom:.5rem;">📈 Difficulty Level</h3>
-          <p class="secondary-text" style="margin-bottom:.75rem;">Adjusts question complexity</p>
-          <select id="difficultySelect" class="input" style="text-align:left;">
-            <option value="easy">Easy</option>
-            <option value="medium" selected>Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-        </div>
-
-        <div class="card settings-row">
-          <div class="settings-label">
-            <h3>🎯 Daily Goal</h3>
-            <p>Set your daily question target</p>
+      <!-- SECTION 2 — Practice Preferences -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Practice Preferences</h3>
+        <div class="settings-section-card">
+          <div class="settings-row-block">
+            <h3>📈 Difficulty Level</h3>
+            <p class="secondary-text" style="margin-bottom:.75rem;">Adjusts question complexity</p>
+            <select id="difficultySelect" class="input" style="text-align:left;">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
           </div>
-          <input type="number" id="dailyGoalInput" class="goal-input" min="10" max="500" step="10" value="50" />
+          <div class="settings-row-divider"></div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>🎯 Daily Goal</h3>
+              <p>Set your daily question target</p>
+            </div>
+            <input type="number" id="dailyGoalInput" class="goal-input" min="10" max="500" step="10" value="50" />
+          </div>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>⏭️ Skip Questions</h3>
+              <p>Allow skipping questions in drills</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="skipToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
 
-      <div class="settings-divider"></div>
-
-      <!-- Section 3: Feedback & Notifications -->
-      <div class="settings-group">
-        <div class="card settings-row">
-          <div class="settings-label">
-            <h3>🔊 Sound Feedback</h3>
-            <p>Play sound on correct/wrong answers</p>
+      <!-- SECTION 3 — Feedback & Interactions -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Feedback &amp; Interactions</h3>
+        <div class="settings-section-card">
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>🔊 Sound Feedback</h3>
+              <p>Play sound on answers and navigation</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="soundToggle" />
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <label class="toggle">
-            <input type="checkbox" id="soundToggle" />
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-
-        <div class="card settings-row">
-          <div class="settings-label">
-            <h3>📳 Vibration</h3>
-            <p>Vibrate on correct answers</p>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>📳 Vibration</h3>
+              <p>Vibrate on correct answers</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="vibrationToggle" />
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <label class="toggle">
-            <input type="checkbox" id="vibrationToggle" />
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-
-        <div class="card settings-row">
-          <div class="settings-label">
-            <h3>🔔 Notifications</h3>
-            <p>Receive daily motivational reminders</p>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>🐢 Reduced Motion</h3>
+              <p>Reduce animations for accessibility</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="reducedMotionToggle" />
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <label class="toggle">
-            <input type="checkbox" id="notificationsToggle" />
-            <span class="toggle-slider"></span>
-          </label>
         </div>
       </div>
 
-      <div class="settings-divider"></div>
-
-      <!-- Section 4: App Info & About -->
-      <div class="settings-group">
-        <div class="card settings-row settings-link" id="openAppGuide">
-          <div class="settings-label">
-            <h3>📖 App Guide</h3>
-            <p>Learn how to use the app</p>
+      <!-- SECTION 4 — Notifications -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Notifications</h3>
+        <div class="settings-section-card">
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>🔔 Daily Reminders</h3>
+              <p>Receive daily motivational push reminders</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="notificationsToggle" />
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <span class="settings-chevron">›</span>
-        </div>
-
-        <div class="card settings-row settings-link" id="openAbout">
-          <div class="settings-label">
-            <h3>💡 About</h3>
-            <p>App info and developer</p>
-          </div>
-          <span class="settings-chevron">›</span>
         </div>
       </div>
 
-      <div class="settings-divider"></div>
-
-      <!-- Section 5: Data & Account -->
-      <div class="settings-group">
-        <div class="card">
-          <h3 style="margin-bottom:.5rem;">🗑️ Clear Data</h3>
-          <p class="secondary-text" style="margin-bottom:.75rem;">Clear specific data or reset everything</p>
-          <button id="clearDataBtn" class="btn" style="background:#fee2e2;color:#dc2626;">Clear Data</button>
+      <!-- SECTION 5 — Help & Information -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Help &amp; Information</h3>
+        <div class="settings-section-card">
+          <div class="settings-row settings-link" id="openAppGuide">
+            <div class="settings-label">
+              <h3>📖 App Guide</h3>
+              <p>Learn how to use the app</p>
+            </div>
+            <span class="settings-chevron">›</span>
+          </div>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row settings-link" id="openAbout">
+            <div class="settings-label">
+              <h3>💡 About</h3>
+              <p>App info and developer</p>
+            </div>
+            <span class="settings-chevron">›</span>
+          </div>
         </div>
+      </div>
 
-        <div class="card" id="logoutCard">
-          <h3 style="margin-bottom:.5rem;">🚪 Account</h3>
-          <p class="secondary-text" style="margin-bottom:.75rem;">Log out of your account on this device</p>
-          <button id="logoutBtn" class="btn" style="background:#fef3c7;color:#92400e;">Log Out</button>
+      <!-- SECTION 6 — Data Management -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Data Management</h3>
+        <div class="settings-section-card">
+          <div class="settings-row-block">
+            <h3>🗑️ Clear Data</h3>
+            <p class="secondary-text" style="margin-bottom:.75rem;">Clear specific data or reset everything</p>
+            <button id="clearDataBtn" class="btn" style="background:#fee2e2;color:#dc2626;">Clear Data</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7 — Account Management -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Account</h3>
+        <div class="settings-section-card">
+          <div class="settings-row settings-link" id="openProfileModal">
+            <div class="settings-label">
+              <h3>👤 Profile</h3>
+              <p>View and edit your profile</p>
+            </div>
+            <span class="settings-chevron">›</span>
+          </div>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row-block">
+            <button id="logoutBtn" class="btn" style="background:#fef3c7;color:#92400e;width:100%;">🚪 Log Out</button>
+          </div>
+          <div class="settings-row-divider"></div>
+          <div class="settings-row-block">
+            <button id="deleteAccountBtn" class="btn" style="background:#fee2e2;color:#dc2626;width:100%;">🗑️ Delete Account</button>
+          </div>
         </div>
       </div>
     </div>
@@ -567,6 +681,48 @@
       </div>
     </div>
   </div>
+
+  <!-- ==================== PROFILE MODAL ==================== -->
+  <div id="profileModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content profile-modal">
+      <h3 class="modal-title">👤 Profile</h3>
+      <div class="profile-field">
+        <label class="profile-field-label">Name</label>
+        <input type="text" id="profileName" class="input profile-input" placeholder="Your name" maxlength="50" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label">Username</label>
+        <input type="text" id="profileUsername" class="input profile-input" readonly disabled />
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label">Started Training On</label>
+        <input type="text" id="profileJoined" class="input profile-input" readonly disabled />
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label">New Password</label>
+        <input type="password" id="profilePassword" class="input profile-input" placeholder="Leave blank to keep current" autocomplete="new-password" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn modal-cancel" id="profileCancel">Cancel</button>
+        <button class="btn accent" id="profileSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DELETE ACCOUNT MODAL ==================== -->
+  <div id="deleteAccountModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <h3 class="modal-title">⚠️ Delete Account</h3>
+      <p class="secondary-text" style="margin-bottom:1rem;">This will permanently delete your account, all data, statistics, and settings. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn modal-cancel" id="deleteAccountCancel">Cancel</button>
+        <button class="btn" id="deleteAccountConfirm" style="background:#fee2e2;color:#dc2626;">Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <!-- ==================== CUSTOM NUMPAD ==================== -->
   <div id="customNumpad" class="custom-numpad">

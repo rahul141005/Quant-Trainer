@@ -28,9 +28,16 @@ var Onboarding = (function () {
   var _currentScreen = 0;
   var _skipped = false;
   var _selectedGoal = 50;
+  var _userName = '';
   var _onComplete = null;
   var _questionAttempt = 0;       /* 0-based: tracks which attempt (0, 1, 2) */
   var _currentQuestion = null;    /* current question object {text, answer} */
+
+  /** Escape HTML special characters to prevent XSS when inserting user text */
+  function _escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 
   /* Simple easy questions for the first question screen — very easy only.
      Each question has a real category so analytics are accurate.
@@ -90,6 +97,10 @@ var Onboarding = (function () {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
       if (typeof FirestoreSync !== 'undefined') {
         FirestoreSync.syncSettings(settings);
+        /* Save user name to Firestore profile */
+        if (_userName) {
+          FirestoreSync.updateProfileName(_userName);
+        }
       }
     } catch (_) { /* ignore */ }
   }
@@ -259,6 +270,10 @@ var Onboarding = (function () {
       '</div></div>' +
       '<h2 class="onboarding-title">Train Your Quant Reflex</h2>' +
       '<p class="onboarding-desc">Improve mental math speed for CAT, MBA CET, and other aptitude exams using fast drills and smart practice tools.</p>' +
+      '<div class="onboarding-name-field">' +
+      '<label class="onboarding-name-label">What should we call you?</label>' +
+      '<input type="text" class="input onboarding-name-input" id="obNameInput" placeholder="Enter your name" maxlength="50" value="' + _escapeHtml(_userName) + '" />' +
+      '</div>' +
       '<div class="onboarding-actions">' +
       '<button class="btn accent onboarding-next-btn" id="obNext">Next</button>' +
       '<button class="btn onboarding-skip-btn" id="obSkip">Skip</button>' +
@@ -313,13 +328,17 @@ var Onboarding = (function () {
   }
 
   function _screen5() {
+    var safeName = _escapeHtml(_userName);
+    var title = safeName
+      ? safeName + ', are you ready to train?'
+      : 'Ready to Train Your Brain?';
     return '<div class="onboarding-visual">' +
       '<div class="onboarding-icon-anim">' +
       '<span class="onboarding-icon-main">🚀</span>' +
       '<span class="onboarding-icon-sparkle onboarding-sparkle-1">💪</span>' +
       '<span class="onboarding-icon-sparkle onboarding-sparkle-2">🔥</span>' +
       '</div></div>' +
-      '<h2 class="onboarding-title">Ready to Train Your Brain?</h2>' +
+      '<h2 class="onboarding-title">' + title + '</h2>' +
       '<p class="onboarding-desc">Your daily goal is set. Let\'s start your first question.</p>' +
       '<div class="onboarding-actions">' +
       '<button class="btn accent onboarding-next-btn" id="obNext">Start Training</button>' +
@@ -350,6 +369,14 @@ var Onboarding = (function () {
         if (typeof triggerHaptic === 'function') triggerHaptic(10);
         if (typeof SoundEngine !== 'undefined') SoundEngine.play('settingsToggle');
 
+        /* Capture name from Screen 1 */
+        if (index === 0) {
+          var nameInput = document.getElementById('obNameInput');
+          if (nameInput && nameInput.value.trim()) {
+            _userName = nameInput.value.trim();
+          }
+        }
+
         if (index === 3) {
           /* Save daily goal */
           _saveDailyGoal();
@@ -370,6 +397,13 @@ var Onboarding = (function () {
     if (skipBtn) {
       skipBtn.addEventListener('click', function () {
         if (typeof triggerHaptic === 'function') triggerHaptic(10);
+        /* Capture name from Screen 1 before skipping */
+        if (index === 0) {
+          var nameInput = document.getElementById('obNameInput');
+          if (nameInput && nameInput.value.trim()) {
+            _userName = nameInput.value.trim();
+          }
+        }
         _skipped = true;
         /* Jump to screen 4 (Daily Goal Selection) */
         _goToScreen(3);

@@ -1,8 +1,9 @@
 /**
  * settings.js — User settings management
  *
- * Manages: dark mode, sound, vibration, difficulty
- * Stores settings in localStorage.
+ * Manages: dark mode, sound, vibration, difficulty, reduced motion,
+ *          skip questions, notifications, profile, account deletion.
+ * Stores settings in localStorage and syncs to Firestore.
  */
 
 var SETTINGS_KEY = 'quant_reflex_settings';
@@ -12,7 +13,10 @@ function loadSettings() {
     var raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) return JSON.parse(raw);
   } catch (_) { /* ignore */ }
-  return { darkMode: false, sound: true, vibration: true, difficulty: 'medium', dailyGoal: 50 };
+  return {
+    darkMode: false, sound: true, vibration: true, difficulty: 'medium',
+    dailyGoal: 50, reducedMotion: false, skipEnabled: false, notificationsEnabled: false
+  };
 }
 
 function saveSettings(s) {
@@ -28,6 +32,30 @@ function saveSettings(s) {
 
 function getDifficulty() {
   return loadSettings().difficulty || 'medium';
+}
+
+/**
+ * Show a toast notification.
+ * @param {string} message - text to display
+ * @param {number} [duration=3000] - ms before auto-dismiss
+ */
+function showToast(message, duration) {
+  var container = document.getElementById('toastContainer');
+  if (!container) return;
+  var toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+  /* Trigger enter animation */
+  requestAnimationFrame(function () {
+    toast.classList.add('toast-visible');
+  });
+  setTimeout(function () {
+    toast.classList.remove('toast-visible');
+    setTimeout(function () {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }, duration || 3000);
 }
 
 /**
@@ -82,8 +110,45 @@ function initSettingsView() {
   });
   vibrationToggle.checked = settings.vibration !== false;
 
+  /* Reduced Motion toggle */
+  var reducedMotionToggle = document.getElementById('reducedMotionToggle');
+  if (reducedMotionToggle) {
+    reducedMotionToggle = rebind(reducedMotionToggle, 'change', function () {
+      settings.reducedMotion = this.checked;
+      document.body.classList.toggle('reduced-motion', this.checked);
+      saveSettings(settings);
+      SoundEngine.play('settingsToggle');
+    });
+    reducedMotionToggle.checked = !!settings.reducedMotion;
+  }
+
+  /* Skip Question toggle */
+  var skipToggle = document.getElementById('skipToggle');
+  if (skipToggle) {
+    skipToggle = rebind(skipToggle, 'change', function () {
+      var toggle = this;
+      if (toggle.checked && settings.difficulty === 'hard') {
+        /* Revert toggle immediately */
+        toggle.checked = false;
+        showToast('Skip is disabled in Hard mode to maintain challenge.');
+        return;
+      }
+      settings.skipEnabled = toggle.checked;
+      saveSettings(settings);
+      SoundEngine.play('settingsToggle');
+    });
+    skipToggle.checked = !!(settings.skipEnabled && settings.difficulty !== 'hard');
+  }
+
   difficultySelect = rebind(difficultySelect, 'change', function () {
     settings.difficulty = this.value;
+    /* If switching to Hard, disable skip */
+    if (this.value === 'hard' && settings.skipEnabled) {
+      settings.skipEnabled = false;
+      var st = document.getElementById('skipToggle');
+      if (st) st.checked = false;
+      showToast('Skip is disabled in Hard mode to maintain challenge.');
+    }
     saveSettings(settings);
     SoundEngine.play('settingsToggle');
   });
@@ -148,6 +213,14 @@ function initSettingsView() {
     });
   }
 
+  /* Profile button — opens profile modal */
+  var profileBtn = document.getElementById('openProfileModal');
+  if (profileBtn) {
+    rebind(profileBtn, 'click', function () {
+      openProfileModal();
+    });
+  }
+
   /* Logout button */
   var logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
@@ -171,6 +244,14 @@ function initSettingsView() {
     });
   }
 
+  /* Delete Account button */
+  var deleteBtn = document.getElementById('deleteAccountBtn');
+  if (deleteBtn) {
+    rebind(deleteBtn, 'click', function () {
+      openDeleteAccountModal();
+    });
+  }
+
   /* PWA install button */
   var installCard = document.getElementById('installCard');
   var installBtn = document.getElementById('installBtn');
@@ -184,6 +265,9 @@ function initSettingsView() {
       });
     });
   }
+
+  /* Apply reduced motion on load */
+  document.body.classList.toggle('reduced-motion', !!settings.reducedMotion);
 }
 
 /**
@@ -222,7 +306,7 @@ function openClearDataModal() {
 
 /**
  * Open a confirmation dialog before clearing data.
- * @param {string} type - 'stats', 'formulas', or 'all'
+ * @param {string} type - 'stats', 'streaks', 'formulas', or 'all'
  */
 function openClearConfirmModal(type) {
   var modal = document.getElementById('clearConfirmModal');
@@ -232,7 +316,8 @@ function openClearConfirmModal(type) {
   if (!modal || !textEl) return;
 
   var messages = {
-    stats: 'This will permanently reset all your statistics, streaks, and performance history. Continue?',
+    stats: 'This will permanently reset all your statistics and performance history. Continue?',
+    streaks: 'This will permanently reset your current and best streaks. Continue?',
     formulas: 'This will permanently delete all your custom topics and added formulas. Continue?',
     all: 'This will permanently reset ALL your data including settings, statistics, formulas, and bookmarks. Continue?'
   };
@@ -249,6 +334,27 @@ function openClearConfirmModal(type) {
 
   okBtn.onclick = function () {
     closeModal();
+    if (type === 'streaks') {
+      /* Handle streaks clearing locally */
+      try {
+        var progress = JSON.parse(localStorage.getItem('quant_reflex_progress') || '{}');
+        progress.currentStreak = 0;
+        progress.bestStreak = 0;
+        progress.dailyStreak = 0;
+        progress.bestDailyStreak = 0;
+        progress.lastPracticeDate = null;
+        localStorage.setItem('quant_reflex_progress', JSON.stringify(progress));
+        if (typeof FirestoreSync !== 'undefined') {
+          FirestoreSync.syncStats(progress);
+        }
+      } catch (_) {}
+      showToast('Streaks cleared successfully.');
+      if (typeof Router !== 'undefined') {
+        Router.showView('settings');
+      }
+      return;
+    }
+
     if (typeof FirestoreSync !== 'undefined') {
       FirestoreSync.clearUserData(type, function (err) {
         if (err) {
@@ -256,15 +362,15 @@ function openClearConfirmModal(type) {
         } else {
           if (type === 'stats') {
             /* Stats only — re-render settings view without reload */
-            alert('Statistics cleared successfully.');
+            showToast('Statistics cleared successfully.');
             if (typeof Router !== 'undefined') {
               Router.showView('settings');
             }
           } else {
             /* Formulas or all — reload page for clean DOM state.
                Auth persistence keeps the user logged in. */
-            alert('Data cleared successfully.');
-            window.location.reload();
+            showToast('Data cleared successfully.');
+            setTimeout(function () { window.location.reload(); }, 500);
           }
         }
       });
@@ -281,7 +387,10 @@ function openClearConfirmModal(type) {
       } else if (type === 'all') {
         resetProgress();
         try {
-          localStorage.setItem('quant_reflex_settings', JSON.stringify({ darkMode: false, sound: true, vibration: true, difficulty: 'medium', dailyGoal: 50 }));
+          localStorage.setItem('quant_reflex_settings', JSON.stringify({
+            darkMode: false, sound: true, vibration: true, difficulty: 'medium',
+            dailyGoal: 50, reducedMotion: false, skipEnabled: false, notificationsEnabled: false
+          }));
           localStorage.setItem('quant_custom_formulas', '{}');
           localStorage.setItem('quant_custom_topics', '[]');
           localStorage.setItem('quant_bookmarks', '[]');
@@ -293,15 +402,152 @@ function openClearConfirmModal(type) {
         }
       }
       if (type === 'stats') {
-        alert('Statistics cleared successfully.');
+        showToast('Statistics cleared successfully.');
         if (typeof Router !== 'undefined') {
           Router.showView('settings');
         }
       } else {
-        alert('Data cleared successfully.');
-        window.location.reload();
+        showToast('Data cleared successfully.');
+        setTimeout(function () { window.location.reload(); }, 500);
       }
     }
+  };
+}
+
+/**
+ * Open the profile modal showing user details.
+ */
+function openProfileModal() {
+  var modal = document.getElementById('profileModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  var nameInput = document.getElementById('profileName');
+  var usernameInput = document.getElementById('profileUsername');
+  var joinedInput = document.getElementById('profileJoined');
+  var passwordInput = document.getElementById('profilePassword');
+  var cancelBtn = document.getElementById('profileCancel');
+  var saveBtn = document.getElementById('profileSave');
+
+  /* Populate fields from Firestore cache or localStorage */
+  var profile = {};
+  try {
+    if (typeof FirestoreSync !== 'undefined' && FirestoreSync._getCache) {
+      var cache = FirestoreSync._getCache();
+      if (cache && cache.profile) profile = cache.profile;
+    }
+  } catch (_) {}
+
+  if (nameInput) nameInput.value = profile.name || '';
+  if (usernameInput) usernameInput.value = profile.username || '';
+  if (joinedInput) {
+    var joinedDate = profile.createdAt ? new Date(profile.createdAt) : null;
+    joinedInput.value = joinedDate ? joinedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+  }
+  if (passwordInput) passwordInput.value = '';
+
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  cancelBtn.onclick = closeModal;
+  modal.onclick = function (e) {
+    if (e.target === modal) closeModal();
+  };
+
+  saveBtn.onclick = function () {
+    var newName = nameInput ? nameInput.value.trim() : '';
+    var newPassword = passwordInput ? passwordInput.value : '';
+
+    /* Update name in Firestore */
+    if (newName && typeof FirestoreSync !== 'undefined') {
+      FirestoreSync.updateProfileName(newName);
+    }
+
+    /* Update password via Firebase Auth */
+    if (newPassword && newPassword.length >= 6) {
+      if (typeof Auth !== 'undefined' && Auth.getCurrentUser()) {
+        Auth.getCurrentUser().updatePassword(newPassword).then(function () {
+          showToast('Password updated successfully.');
+        }).catch(function (err) {
+          showToast('Password update failed: ' + err.message);
+        });
+      }
+    } else if (newPassword && newPassword.length < 6) {
+      showToast('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (newName) {
+      showToast('Profile updated.');
+    }
+    closeModal();
+  };
+}
+
+/**
+ * Open the delete account confirmation modal.
+ */
+function openDeleteAccountModal() {
+  var modal = document.getElementById('deleteAccountModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  var cancelBtn = document.getElementById('deleteAccountCancel');
+  var confirmBtn = document.getElementById('deleteAccountConfirm');
+
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  cancelBtn.onclick = closeModal;
+  modal.onclick = function (e) {
+    if (e.target === modal) closeModal();
+  };
+
+  confirmBtn.onclick = function () {
+    closeModal();
+    if (typeof Auth === 'undefined' || !Auth.getCurrentUser()) {
+      showToast('Unable to delete account. Not logged in.');
+      return;
+    }
+
+    var user = Auth.getCurrentUser();
+
+    /**
+     * Delete account in proper order:
+     * 1. Delete Firestore user document (while auth context is valid)
+     * 2. Clear all local data
+     * 3. Delete Firebase Auth account (last — invalidates the session)
+     */
+    function deleteAuthAndReload() {
+      try {
+        localStorage.clear();
+      } catch (_) {}
+      user.delete().then(function () {
+        window.location.reload();
+      }).catch(function (err) {
+        showToast('Account deletion failed: ' + err.message);
+      });
+    }
+
+    if (typeof FirebaseApp !== 'undefined' && FirebaseApp.isReady()) {
+      var db = FirebaseApp.getDb();
+      var userId = FirebaseApp.getUserId();
+      if (db && userId) {
+        db.collection('users').doc(userId).delete()
+          .then(deleteAuthAndReload)
+          .catch(function (err) {
+            console.warn('Failed to delete Firestore user document:', err);
+            /* Proceed with auth deletion even if Firestore delete fails */
+            deleteAuthAndReload();
+          });
+        return;
+      }
+    }
+
+    /* No Firestore — just clear and delete auth */
+    deleteAuthAndReload();
   };
 }
 

@@ -175,10 +175,14 @@ var FirestoreSync = (function () {
     }
     var defaults = {
       profile: {
+        name: '',
         username: username,
         createdAt: new Date().toISOString()
       },
-      settings: { darkMode: false, sound: true, vibration: true, difficulty: 'medium', dailyGoal: 50 },
+      settings: {
+        darkMode: false, sound: true, vibration: true, difficulty: 'medium',
+        dailyGoal: 50, reducedMotion: false, skipEnabled: false, notificationsEnabled: false
+      },
       stats: {
         totalAttempted: 0, totalCorrect: 0,
         bestStreak: 0, currentStreak: 0,
@@ -373,7 +377,8 @@ var FirestoreSync = (function () {
         totalAttempted: 0, totalCorrect: 0,
         bestStreak: 0, currentStreak: 0,
         drillSessions: 0, timedTestSessions: 0,
-        dailyStreak: 0, lastActiveDate: null,
+        dailyStreak: 0, bestDailyStreak: 0,
+        lastActiveDate: null,
         lastPracticeDate: null,
         todayAttempted: 0, todayCorrect: 0,
         categoryStats: {}, mistakes: [],
@@ -409,12 +414,16 @@ var FirestoreSync = (function () {
         if (callback) callback(null);
       }
     } else if (type === 'all') {
-      var defaultSettings = { darkMode: false, sound: true, vibration: true, difficulty: 'medium', dailyGoal: 50 };
+      var defaultSettings = {
+        darkMode: false, sound: true, vibration: true, difficulty: 'medium',
+        dailyGoal: 50, reducedMotion: false, skipEnabled: false, notificationsEnabled: false
+      };
       var defaultStats = {
         totalAttempted: 0, totalCorrect: 0,
         bestStreak: 0, currentStreak: 0,
         drillSessions: 0, timedTestSessions: 0,
-        dailyStreak: 0, lastActiveDate: null,
+        dailyStreak: 0, bestDailyStreak: 0,
+        lastActiveDate: null,
         lastPracticeDate: null,
         todayAttempted: 0, todayCorrect: 0,
         categoryStats: {}, mistakes: [],
@@ -503,6 +512,26 @@ var FirestoreSync = (function () {
     savePracticeSession: savePracticeSession,
     clearUserData: clearUserData,
     beginDrillBatch: beginDrillBatch,
-    endDrillBatch: endDrillBatch
+    endDrillBatch: endDrillBatch,
+    /**
+     * Expose the in-memory cache for profile reading (used by settings).
+     * @returns {object|null}
+     */
+    _getCache: function () { return _memoryCache; },
+    /**
+     * Update the user's display name in Firestore profile.
+     * @param {string} name
+     */
+    updateProfileName: function (name) {
+      if (!name) return;
+      var profile;
+      if (_memoryCache && _memoryCache.profile) {
+        _memoryCache.profile.name = name;
+        profile = _memoryCache.profile;
+      } else {
+        profile = { name: name };
+      }
+      queueUpdate('profile', profile);
+    }
   };
 })();

@@ -12,11 +12,12 @@
  *   8. Manage customizable quick study links
  */
 
-/* ---- Apply dark mode from settings immediately ---- */
+/* ---- Apply dark mode and reduced motion from settings immediately ---- */
 (function () {
   try {
     var settings = JSON.parse(localStorage.getItem('quant_reflex_settings') || '{}');
     if (settings.darkMode) document.body.classList.add('dark-mode');
+    if (settings.reducedMotion) document.body.classList.add('reduced-motion');
   } catch (_) { /* ignore */ }
 })();
 
@@ -657,9 +658,11 @@ document.addEventListener('DOMContentLoaded', function () {
     _hideAppLoader();
     if (container) container.style.display = '';
     if (bottomNav) bottomNav.style.display = '';
-    /* Re-render current view to reflect loaded data */
-    var currentView = Router.getCurrentView();
-    if (currentView) Router.showView(currentView);
+    /* Re-render current view to reflect loaded data.
+       Fall back to 'home' if Router hasn't initialized yet —
+       Router.showView safely handles unknown views by defaulting to home. */
+    var currentView = Router.getCurrentView() || 'home';
+    Router.showView(currentView);
   }
 
   /**
@@ -847,6 +850,30 @@ document.addEventListener('DOMContentLoaded', function () {
         '<div class="stat-card"><div class="value">' + (p.bestStreak || 0) + '</div><div class="label">Best Streak</div></div>';
     }
 
+    /* Dynamic greeting */
+    var greetingEl = document.getElementById('homeGreeting');
+    if (greetingEl) {
+      var userName = '';
+      try {
+        if (typeof FirestoreSync !== 'undefined' && FirestoreSync._getCache) {
+          var cache = FirestoreSync._getCache();
+          if (cache && cache.profile && cache.profile.name) {
+            userName = String(cache.profile.name).trim();
+          }
+        }
+      } catch (_) {}
+      var hour = new Date().getHours();
+      var greeting;
+      if (hour < 12) {
+        greeting = userName ? 'Good morning, ' + userName + '. Ready to train your brain?' : 'Good morning! Ready to train your brain?';
+      } else if (hour < 17) {
+        greeting = userName ? 'Keep the momentum going, ' + userName + '.' : 'Keep the momentum going!';
+      } else {
+        greeting = userName ? 'Let\'s finish today\'s training strong, ' + userName + '.' : 'Let\'s finish today\'s training strong!';
+      }
+      greetingEl.textContent = greeting;
+    }
+
     /* Daily goal card */
     var settings = loadSettings();
     var goal = settings.dailyGoal || 50;
@@ -926,6 +953,13 @@ document.addEventListener('DOMContentLoaded', function () {
       modeCards[i].addEventListener('click', function () {
         SoundEngine.play('settingsToggle');
         var modeKey = this.getAttribute('data-mode');
+        if (modeKey === 'wordproblems') {
+          /* Future feature teaser */
+          if (typeof showToast === 'function') {
+            showToast('Word problem training is coming soon.');
+          }
+          return;
+        }
         if (modeKey === 'focus') {
           modeSelect.style.display = 'none';
           categorySelect.style.display = 'block';
@@ -1169,6 +1203,7 @@ function renderStatsView() {
      A difference > 2% is considered meaningful enough to report as improving/declining,
      while smaller changes are reported as steady to avoid noise from variance. */
   var trend = '—';
+  var trendClass = '';
   var history = p.dailyHistory || {};
   var dates = Object.keys(history).sort();
   if (dates.length >= 2) {
@@ -1189,36 +1224,63 @@ function renderStatsView() {
         var recentPct = (recentAcc / recentTotal) * 100;
         var olderPct = (olderAcc / olderTotal) * 100;
         var diff = recentPct - olderPct;
-        if (diff > 2) trend = '📈 Improving';
-        else if (diff < -2) trend = '📉 Declining';
-        else trend = '➡️ Steady';
+        if (diff > 2) {
+          trend = '📈 Improving';
+          trendClass = ' stat-card-positive';
+        } else if (diff < -2) {
+          trend = '📉 Declining';
+          trendClass = ' stat-card-negative';
+        } else {
+          trend = '➡️ Steady';
+        }
       }
     }
   }
 
-  var statsGrid = document.getElementById('statsGrid');
-  if (statsGrid) {
-    /* Show placeholder when not enough data for category ranking.
-       Show the message whenever insights are unavailable, regardless of total count,
-       since the per-category threshold (10 per category) may not be met even with
-       many total attempts spread across categories. */
+  /* Section 1 — Practice Overview (3 cols) */
+  var overviewEl = document.getElementById('statsPracticeOverview');
+  if (overviewEl) {
+    overviewEl.innerHTML =
+      '<div class="stat-card"><div class="value">' + p.totalAttempted + '</div><div class="label">Questions Attempted</div></div>' +
+      '<div class="stat-card"><div class="value">' + p.totalCorrect + '</div><div class="label">Correct Answers</div></div>' +
+      '<div class="stat-card"><div class="value">' + accuracy + '%</div><div class="label">Accuracy</div></div>';
+  }
+
+  /* Section 2 — Speed & Efficiency (2 cols) */
+  var speedEl = document.getElementById('statsSpeed');
+  if (speedEl) {
+    speedEl.innerHTML =
+      '<div class="stat-card"><div class="value">' + (avgTime || '—') + 's</div><div class="label">Avg Response Time</div></div>' +
+      '<div class="stat-card"><div class="value">' + (p.bestStreak || 0) + '</div><div class="label">Best Streak</div></div>';
+  }
+
+  /* Section 3 — Activity Stats (2 cols) */
+  var activityEl = document.getElementById('statsActivity');
+  if (activityEl) {
+    activityEl.innerHTML =
+      '<div class="stat-card"><div class="value">' + (p.drillSessions || 0) + '</div><div class="label">Drill Sessions</div></div>' +
+      '<div class="stat-card"><div class="value">' + (p.timedTestSessions || 0) + '</div><div class="label">Timed Tests</div></div>';
+  }
+
+  /* Section 4 — Consistency (2 cols) */
+  var consistencyEl = document.getElementById('statsConsistency');
+  if (consistencyEl) {
+    consistencyEl.innerHTML =
+      '<div class="stat-card"><div class="value">' + (p.dailyStreak || 0) + ' 🔥</div><div class="label">Daily Streak</div></div>' +
+      '<div class="stat-card"><div class="value">' + (p.todayAttempted || 0) + '</div><div class="label">Today\'s Questions</div></div>';
+  }
+
+  /* Section 5 — Performance Insights (3 cols) */
+  var insightsEl = document.getElementById('statsInsights');
+  if (insightsEl) {
     var categoryInsightMsg = (!weakest && !strongest) ? 'Solve more questions to unlock category insights.' : '';
     var weakestDisplay = weakest ? formatCategoryName(weakest) : (categoryInsightMsg ? '🔒' : '—');
     var strongestDisplay = strongest ? formatCategoryName(strongest) : (categoryInsightMsg ? '🔒' : '—');
 
-    statsGrid.innerHTML =
-      '<div class="stat-card"><div class="value">' + p.totalAttempted + '</div><div class="label">Questions Attempted</div></div>' +
-      '<div class="stat-card"><div class="value">' + p.totalCorrect + '</div><div class="label">Correct Answers</div></div>' +
-      '<div class="stat-card"><div class="value">' + accuracy + '%</div><div class="label">Accuracy</div></div>' +
-      '<div class="stat-card"><div class="value">' + (p.bestStreak || 0) + '</div><div class="label">Best Streak</div></div>' +
-      '<div class="stat-card"><div class="value">' + (p.drillSessions || 0) + '</div><div class="label">Drill Sessions</div></div>' +
-      '<div class="stat-card"><div class="value">' + (p.timedTestSessions || 0) + '</div><div class="label">Timed Tests</div></div>' +
-      '<div class="stat-card"><div class="value">' + (p.dailyStreak || 0) + '</div><div class="label">Daily Streak 🔥</div></div>' +
-      '<div class="stat-card"><div class="value">' + (p.todayAttempted || 0) + '</div><div class="label">Today\'s Questions</div></div>' +
-      '<div class="stat-card"><div class="value">' + (avgTime || '—') + 's</div><div class="label">Avg Response Time</div></div>' +
-      '<div class="stat-card' + (weakest ? ' highlight' : '') + '"><div class="value value-sm">' + weakestDisplay + '</div><div class="label">Weakest Category</div>' + (categoryInsightMsg && !weakest ? '<div class="stat-hint">' + categoryInsightMsg + '</div>' : '') + '</div>' +
-      '<div class="stat-card' + (strongest ? ' highlight' : '') + '"><div class="value value-sm">' + strongestDisplay + '</div><div class="label">Strongest Category</div>' + (categoryInsightMsg && !strongest ? '<div class="stat-hint">' + categoryInsightMsg + '</div>' : '') + '</div>' +
-      '<div class="stat-card"><div class="value value-sm">' + trend + '</div><div class="label">Recent Trend</div></div>';
+    insightsEl.innerHTML =
+      '<div class="stat-card' + (strongest ? ' stat-card-positive' : '') + '"><div class="value value-sm">' + strongestDisplay + '</div><div class="label">Strongest Category</div>' + (categoryInsightMsg && !strongest ? '<div class="stat-hint">' + categoryInsightMsg + '</div>' : '') + '</div>' +
+      '<div class="stat-card' + (weakest ? ' stat-card-negative' : '') + '"><div class="value value-sm">' + weakestDisplay + '</div><div class="label">Weakest Category</div>' + (categoryInsightMsg && !weakest ? '<div class="stat-hint">' + categoryInsightMsg + '</div>' : '') + '</div>' +
+      '<div class="stat-card' + trendClass + '"><div class="value value-sm">' + trend + '</div><div class="label">Recent Trend</div></div>';
   }
 
   /* Category stats with color-coded bars and strength labels */
@@ -1253,7 +1315,7 @@ function renderStatsView() {
     var strengthLabel = '';
     if (barWidth >= 85) { barClass += 'cat-bar-high'; strengthLabel = '<span class="category-strength-label strength-strong">Strong</span>'; }
     else if (barWidth >= 65) { barClass += 'cat-bar-mid'; strengthLabel = '<span class="category-strength-label strength-moderate">Moderate</span>'; }
-    else if (barWidth >= 40) { barClass += 'cat-bar-low'; strengthLabel = '<span class="category-strength-label strength-moderate">Moderate</span>'; }
+    else if (barWidth >= 40) { barClass += 'cat-bar-low'; strengthLabel = '<span class="category-strength-label strength-weak">Weak</span>'; }
     else { barClass += 'cat-bar-weak'; strengthLabel = '<span class="category-strength-label strength-weak">Weak</span>'; }
     html +=
       '<div class="category-stat-row">' +
