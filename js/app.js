@@ -12,11 +12,12 @@
  *   8. Manage customizable quick study links
  */
 
-/* ---- Apply dark mode from settings immediately ---- */
+/* ---- Apply dark mode and reduced motion from settings immediately ---- */
 (function () {
   try {
     var settings = JSON.parse(localStorage.getItem('quant_reflex_settings') || '{}');
     if (settings.darkMode) document.body.classList.add('dark-mode');
+    if (settings.reducedMotion) document.body.classList.add('reduced-motion');
   } catch (_) { /* ignore */ }
 })();
 
@@ -845,6 +846,30 @@ document.addEventListener('DOMContentLoaded', function () {
         '<div class="stat-card"><div class="value">' + accuracy + '%</div><div class="label">Accuracy</div></div>' +
         '<div class="stat-card"><div class="value">' + (p.currentStreak || 0) + '</div><div class="label">Current Streak</div></div>' +
         '<div class="stat-card"><div class="value">' + (p.bestStreak || 0) + '</div><div class="label">Best Streak</div></div>';
+    }
+
+    /* Dynamic greeting */
+    var greetingEl = document.getElementById('homeGreeting');
+    if (greetingEl) {
+      var userName = '';
+      try {
+        if (typeof FirestoreSync !== 'undefined' && FirestoreSync._getCache) {
+          var cache = FirestoreSync._getCache();
+          if (cache && cache.profile && cache.profile.name) {
+            userName = cache.profile.name;
+          }
+        }
+      } catch (_) {}
+      var hour = new Date().getHours();
+      var greeting;
+      if (hour < 12) {
+        greeting = userName ? 'Good morning, ' + userName + '. Ready to train your brain?' : 'Good morning! Ready to train your brain?';
+      } else if (hour < 17) {
+        greeting = userName ? 'Keep the momentum going, ' + userName + '.' : 'Keep the momentum going!';
+      } else {
+        greeting = userName ? 'Let\'s finish today\'s training strong, ' + userName + '.' : 'Let\'s finish today\'s training strong!';
+      }
+      greetingEl.textContent = greeting;
     }
 
     /* Daily goal card */

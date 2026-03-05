@@ -60,7 +60,14 @@
           <span class="clear-option-icon">📊</span>
           <div class="clear-option-info">
             <strong>Clear Statistics</strong>
-            <span>Reset all progress, streaks, and performance history</span>
+            <span>Reset all progress and performance history</span>
+          </div>
+        </button>
+        <button class="clear-option-btn" data-clear="streaks">
+          <span class="clear-option-icon">🔥</span>
+          <div class="clear-option-info">
+            <strong>Clear Streaks</strong>
+            <span>Reset current and best streaks</span>
           </div>
         </button>
         <button class="clear-option-btn" data-clear="formulas">
@@ -115,7 +122,7 @@
     <div id="view-home" class="spa-view">
       <header>
         <h1>Quant Reflex Trainer</h1>
-        <p style="color:#64748b;margin-top:.35rem;">Train your mental math speed daily</p>
+        <p id="homeGreeting" class="home-greeting">Train your mental math speed daily</p>
       </header>
 
       <!-- Daily Warmup -->
@@ -625,6 +632,48 @@
       </div>
     </div>
   </div>
+
+  <!-- ==================== PROFILE MODAL ==================== -->
+  <div id="profileModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content profile-modal">
+      <h3 class="modal-title">👤 Profile</h3>
+      <div class="profile-field">
+        <label class="profile-field-label">Name</label>
+        <input type="text" id="profileName" class="input profile-input" placeholder="Your name" maxlength="50" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label">Username</label>
+        <input type="text" id="profileUsername" class="input profile-input" readonly disabled />
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label">Started Training On</label>
+        <input type="text" id="profileJoined" class="input profile-input" readonly disabled />
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label">New Password</label>
+        <input type="password" id="profilePassword" class="input profile-input" placeholder="Leave blank to keep current" autocomplete="new-password" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn modal-cancel" id="profileCancel">Cancel</button>
+        <button class="btn accent" id="profileSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DELETE ACCOUNT MODAL ==================== -->
+  <div id="deleteAccountModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <h3 class="modal-title">⚠️ Delete Account</h3>
+      <p class="secondary-text" style="margin-bottom:1rem;">This will permanently delete your account, all data, statistics, and settings. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn modal-cancel" id="deleteAccountCancel">Cancel</button>
+        <button class="btn" id="deleteAccountConfirm" style="background:#fee2e2;color:#dc2626;">Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <!-- ==================== CUSTOM NUMPAD ==================== -->
   <div id="customNumpad" class="custom-numpad">
