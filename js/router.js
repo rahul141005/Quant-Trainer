@@ -97,6 +97,9 @@ var Router = (function () {
 
     /* Listen for back/forward button and swipe-back navigation */
     window.addEventListener('popstate', function () {
+      /* Skip if a drill session is active — app.js handles
+         back navigation during drills with its own confirm dialog */
+      if (typeof _drillSessionActive !== 'undefined' && _drillSessionActive) return;
       var hash = window.location.hash.replace('#', '') || 'home';
       _navigatingFromPopstate = true;
       try { showView(hash); } finally { _navigatingFromPopstate = false; }

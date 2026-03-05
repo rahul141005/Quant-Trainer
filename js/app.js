@@ -381,8 +381,8 @@ function initSwipeNavigation() {
   var MIN_VERTICAL_PX = 10;
 
   document.addEventListener('touchstart', function (e) {
-    /* Don't capture swipes on inputs or inside modals */
-    if (e.target.closest('.modal-overlay, .table-modal-overlay, .info-modal-overlay, input, textarea, select')) return;
+    /* Don't capture swipes on inputs or inside modals or onboarding */
+    if (e.target.closest('.modal-overlay, .table-modal-overlay, .info-modal-overlay, .onboarding-overlay, input, textarea, select')) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartTime = Date.now();
@@ -520,12 +520,29 @@ document.addEventListener('DOMContentLoaded', function () {
           var currentView = Router.getCurrentView();
           if (currentView) Router.showView(currentView);
         }
+        /* Check onboarding after Firestore data is loaded */
+        _launchOnboardingIfNeeded();
       });
+    } else {
+      /* No Firestore — check onboarding immediately */
+      _launchOnboardingIfNeeded();
     }
 
     /* Initialize notification scheduling if enabled */
     if (typeof NotificationManager !== 'undefined') {
       NotificationManager.init();
+    }
+  }
+
+  /**
+   * Launch onboarding if it hasn't been completed yet.
+   */
+  function _launchOnboardingIfNeeded() {
+    if (typeof Onboarding !== 'undefined' && Onboarding.shouldShow()) {
+      Onboarding.show(function () {
+        /* Onboarding finished — navigate to home */
+        Router.showView('home');
+      });
     }
   }
 
@@ -638,6 +655,7 @@ document.addEventListener('DOMContentLoaded', function () {
   } else {
     /* Firebase not available — show app directly (localStorage only mode) */
     if (loginScreen) loginScreen.style.display = 'none';
+    _launchOnboardingIfNeeded();
   }
 
   /* ---- Bottom nav click handlers ---- */
