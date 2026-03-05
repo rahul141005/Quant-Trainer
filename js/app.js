@@ -170,6 +170,18 @@ function _exitDrillSession() {
   hideCustomNumpad();
 }
 
+/**
+ * Close all open info modals (App Guide, About).
+ * Called on navigation to prevent stale modals.
+ */
+function _closeAllInfoModals() {
+  var modals = document.querySelectorAll('.info-modal-overlay');
+  for (var i = 0; i < modals.length; i++) {
+    modals[i].style.display = 'none';
+    modals[i].classList.remove('closing');
+  }
+}
+
 /* ---- Quick Study Links Configuration ---- */
 var QUICK_LINKS_KEY = 'quant_quick_links';
 var AVAILABLE_QUICK_LINKS = [
@@ -365,7 +377,7 @@ function initSwipeNavigation() {
 
   document.addEventListener('touchstart', function (e) {
     /* Don't capture swipes on inputs or inside modals */
-    if (e.target.closest('.modal-overlay, .table-modal-overlay, input, textarea, select')) return;
+    if (e.target.closest('.modal-overlay, .table-modal-overlay, .info-modal-overlay, input, textarea, select')) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartTime = Date.now();
@@ -419,6 +431,7 @@ function initSwipeNavigation() {
     }
 
     if (nextIndex >= 0 && nextIndex < viewOrder.length) {
+      _closeAllInfoModals();
       SoundEngine.play('tabSwitch');
       triggerHaptic(10);
       Router.showView(viewOrder[nextIndex]);
@@ -638,6 +651,8 @@ document.addEventListener('DOMContentLoaded', function () {
         FirestoreSync.endDrillBatch();
       }
       _exitDrillSession();
+      /* Close any open info modals */
+      _closeAllInfoModals();
       SoundEngine.play('tabSwitch');
       triggerHaptic(10);
       Router.showView(view);
@@ -646,6 +661,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ---- Cleanup drill engine on back/forward navigation ---- */
   window.addEventListener('popstate', function () {
+    /* Close any open info modals on navigation */
+    _closeAllInfoModals();
     if (_drillSessionActive) {
       /* Drills only run inside the Practice view, so 'practice' is always correct here */
       history.pushState({ view: 'practice' }, '', '#practice');

@@ -313,19 +313,27 @@ function openInfoModal(modalId) {
   if (!modal) return;
   modal.style.display = 'block';
   modal.classList.remove('closing');
+  SoundEngine.play('tableModal');
 
   var closeBtn = modal.querySelector('.info-modal-close');
 
   function closeModal() {
     modal.classList.add('closing');
+    SoundEngine.play('tableModal');
+    document.removeEventListener('keydown', handleEscape);
     setTimeout(function () {
       modal.style.display = 'none';
       modal.classList.remove('closing');
     }, 200);
   }
 
+  function handleEscape(e) {
+    if (e.key === 'Escape') closeModal();
+  }
+
   if (closeBtn) closeBtn.onclick = closeModal;
   modal.onclick = function (e) {
     if (e.target === modal) closeModal();
   };
+  document.addEventListener('keydown', handleEscape);
 }
