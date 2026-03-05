@@ -47,11 +47,9 @@ var Router = (function () {
     /* Update bottom nav active state */
     var navLinks = document.querySelectorAll('.bottom-nav a');
     for (var j = 0; j < navLinks.length; j++) {
-      navLinks[j].classList.remove('active');
-      var href = navLinks[j].getAttribute('data-view');
-      if (href === viewId) {
-        navLinks[j].classList.add('active');
-      }
+      var isActive = navLinks[j].getAttribute('data-view') === viewId;
+      navLinks[j].classList.toggle('active', isActive);
+      navLinks[j].setAttribute('aria-selected', isActive ? 'true' : 'false');
     }
 
     /* Run init callback once */

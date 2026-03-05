@@ -785,9 +785,21 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---- Bottom nav click handlers ---- */
   var navLinks = document.querySelectorAll('.bottom-nav a');
   for (var i = 0; i < navLinks.length; i++) {
+    /* Clean up tab-pop class after animation finishes */
+    (function (link) {
+      var icon = link.querySelector('.nav-icon img');
+      if (icon) {
+        icon.addEventListener('animationend', function () {
+          this.classList.remove('tab-pop');
+        });
+      }
+    })(navLinks[i]);
+
     navLinks[i].addEventListener('click', function (e) {
       e.preventDefault();
       var view = this.getAttribute('data-view');
+      /* Skip if already on this tab and no drill is active */
+      if (this.classList.contains('active') && !_drillSessionActive) return;
       /* Cleanup any active drill engine when navigating away */
       if (_activeDrillEngine) {
         _activeDrillEngine.cleanup();

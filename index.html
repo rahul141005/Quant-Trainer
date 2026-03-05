@@ -173,7 +173,7 @@
 
     <!-- ==================== PRACTICE VIEW ==================== -->
     <div id="view-practice" class="spa-view">
-      <header><h1><img src="appicons/tab/practicetab.svg" alt="Practice" class="header-icon" width="28" height="28"> Practice</h1></header>
+      <header><h1><img src="appicons/tab/practicetab.svg" alt="Practice" class="header-icon" width="28" height="28" draggable="false"> Practice</h1></header>
 
       <!-- Mode selection -->
       <div id="modeSelect" class="card practice-container">
@@ -232,7 +232,7 @@
 
     <!-- ==================== LEARN VIEW ==================== -->
     <div id="view-learn" class="spa-view">
-      <header><h1><img src="appicons/tab/learntab.svg" alt="Learn" class="header-icon" width="28" height="28"> Learn</h1></header>
+      <header><h1><img src="appicons/tab/learntab.svg" alt="Learn" class="header-icon" width="28" height="28" draggable="false"> Learn</h1></header>
 
       <!-- Search -->
       <div class="learn-search-container">
@@ -357,7 +357,7 @@
 
     <!-- ==================== STATS VIEW ==================== -->
     <div id="view-stats" class="spa-view">
-      <header><h1><img src="appicons/tab/statstab.svg" alt="Stats" class="header-icon" width="28" height="28"> Analytics</h1></header>
+      <header><h1><img src="appicons/tab/statstab.svg" alt="Stats" class="header-icon" width="28" height="28" draggable="false"> Analytics</h1></header>
 
       <!-- Section 1 — Practice Overview -->
       <div class="analytics-section">
@@ -412,7 +412,7 @@
 
     <!-- ==================== SETTINGS VIEW ==================== -->
     <div id="view-settings" class="spa-view">
-      <header><h1><img src="appicons/tab/settingstab.svg" alt="Settings" class="header-icon" width="28" height="28"> Settings</h1></header>
+      <header><h1><img src="appicons/tab/settingstab.svg" alt="Settings" class="header-icon" width="28" height="28" draggable="false"> Settings</h1></header>
 
       <!-- Install App -->
       <div class="card" id="installCard" style="display:none;">
@@ -747,12 +747,12 @@
   </div>
 
   <!-- Bottom Navigation -->
-  <nav class="bottom-nav" style="display:none;">
-    <a href="#home" data-view="home"><span class="nav-icon"><img src="appicons/tab/hometab.svg" alt="Home" width="24" height="24"></span>Home</a>
-    <a href="#practice" data-view="practice"><span class="nav-icon"><img src="appicons/tab/practicetab.svg" alt="Practice" width="24" height="24"></span>Practice</a>
-    <a href="#learn" data-view="learn"><span class="nav-icon"><img src="appicons/tab/learntab.svg" alt="Learn" width="24" height="24"></span>Learn</a>
-    <a href="#stats" data-view="stats"><span class="nav-icon"><img src="appicons/tab/statstab.svg" alt="Stats" width="24" height="24"></span>Stats</a>
-    <a href="#settings" data-view="settings"><span class="nav-icon"><img src="appicons/tab/settingstab.svg" alt="Settings" width="24" height="24"></span>Settings</a>
+  <nav class="bottom-nav" style="display:none;" role="tablist">
+    <a href="#home" data-view="home" role="tab"><span class="nav-icon"><img src="appicons/tab/hometab.svg" alt="Home" width="24" height="24" draggable="false"></span>Home</a>
+    <a href="#practice" data-view="practice" role="tab"><span class="nav-icon"><img src="appicons/tab/practicetab.svg" alt="Practice" width="24" height="24" draggable="false"></span>Practice</a>
+    <a href="#learn" data-view="learn" role="tab"><span class="nav-icon"><img src="appicons/tab/learntab.svg" alt="Learn" width="24" height="24" draggable="false"></span>Learn</a>
+    <a href="#stats" data-view="stats" role="tab"><span class="nav-icon"><img src="appicons/tab/statstab.svg" alt="Stats" width="24" height="24" draggable="false"></span>Stats</a>
+    <a href="#settings" data-view="settings" role="tab"><span class="nav-icon"><img src="appicons/tab/settingstab.svg" alt="Settings" width="24" height="24" draggable="false"></span>Settings</a>
   </nav>
 
   <!-- Firebase SDK (compat for broad browser support) -->
