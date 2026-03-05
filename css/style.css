@@ -792,6 +792,185 @@ body.dark-mode .settings-divider {
 }
 .goal-input:focus { border-color: #2563eb; }
 
+/* ---- Settings Info Sections ---- */
+.settings-link {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s;
+}
+.settings-link:active {
+  background: rgba(37,99,235,.06);
+}
+.settings-chevron {
+  font-size: 1.4rem;
+  color: #94a3b8;
+  font-weight: 300;
+  line-height: 1;
+  flex-shrink: 0;
+}
+body.dark-mode .settings-link:active {
+  background: rgba(96,165,250,.08);
+}
+body.dark-mode .settings-chevron { color: #64748b; }
+
+/* ---- Full-screen Info Modals ---- */
+.info-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 300;
+  animation: infoModalFadeIn .25s ease;
+}
+.info-modal-overlay.closing {
+  animation: infoModalFadeOut .2s ease forwards;
+}
+@keyframes infoModalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes infoModalFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.info-modal-content {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.5rem 1.25rem 2rem;
+  box-shadow: -4px 0 24px rgba(0,0,0,.12);
+  animation: infoModalSlideIn .3s cubic-bezier(.16,1,.3,1);
+}
+.info-modal-overlay.closing .info-modal-content {
+  animation: infoModalSlideOut .2s ease forwards;
+}
+@keyframes infoModalSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes infoModalSlideOut {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+.info-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  background: rgba(0,0,0,.06);
+  border-radius: 50%;
+  font-size: 1rem;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .12s;
+  line-height: 1;
+  z-index: 1;
+}
+.info-modal-close:active {
+  transform: scale(.9);
+  background: rgba(0,0,0,.1);
+}
+.info-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: .25rem;
+  padding-right: 2.5rem;
+}
+.info-modal-subtitle {
+  font-size: .82rem;
+  color: #64748b;
+  margin-bottom: 1.25rem;
+}
+.info-block {
+  margin-bottom: 1rem;
+}
+.info-block:last-child {
+  margin-bottom: 0;
+}
+.info-block h4 {
+  font-size: .95rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: .35rem;
+}
+.info-block p {
+  font-size: .82rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: .25rem;
+}
+.info-block p:last-child {
+  margin-bottom: 0;
+}
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.info-list li {
+  font-size: .82rem;
+  color: #475569;
+  line-height: 1.5;
+  padding: .2rem 0 .2rem .75rem;
+  position: relative;
+}
+.info-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #2563eb;
+  font-weight: 700;
+}
+.info-version {
+  font-size: .75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.info-quote {
+  border-left: 3px solid #2563eb;
+  padding-left: .75rem;
+  margin-top: .5rem;
+}
+.info-quote p {
+  font-size: .82rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Dark mode info modals */
+body.dark-mode .info-modal-overlay {
+  background: rgba(0,0,0,.6);
+}
+body.dark-mode .info-modal-content {
+  background: #1e293b;
+  box-shadow: -4px 0 24px rgba(0,0,0,.3);
+}
+body.dark-mode .info-modal-close {
+  background: rgba(255,255,255,.08);
+  color: #94a3b8;
+}
+body.dark-mode .info-modal-title { color: #e2e8f0; }
+body.dark-mode .info-modal-subtitle { color: #94a3b8; }
+body.dark-mode .info-block h4 { color: #e2e8f0; }
+body.dark-mode .info-block p { color: #94a3b8; }
+body.dark-mode .info-list li { color: #94a3b8; }
+body.dark-mode .info-list li::before { color: #60a5fa; }
+body.dark-mode .info-version { color: #64748b; }
+body.dark-mode .info-quote { border-left-color: #60a5fa; }
+body.dark-mode .info-quote p { color: #94a3b8; }
+
 /* ---- Category Stats (Stats page) ---- */
 .category-stats-list { margin-top: .5rem; }
 .category-stat-row {
@@ -1668,6 +1847,11 @@ body.dark-mode .numpad-btn.numpad-submit {
 /* When numpad is visible, add bottom padding to body to prevent content overlap */
 body.numpad-active {
   padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px) + 14rem);
+}
+
+/* When in drill session (nav hidden), numpad sits at screen bottom */
+body.drill-session-active .custom-numpad {
+  bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ---- Native App Feel Enhancements ---- */

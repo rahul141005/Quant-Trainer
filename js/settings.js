@@ -124,6 +124,22 @@ function initSettingsView() {
     notifToggle.checked = notifEnabled;
   }
 
+  /* App Guide button — opens modal */
+  var appGuideBtn = document.getElementById('openAppGuide');
+  if (appGuideBtn) {
+    rebind(appGuideBtn, 'click', function () {
+      openInfoModal('appGuideModal');
+    });
+  }
+
+  /* About button — opens modal */
+  var aboutBtn = document.getElementById('openAbout');
+  if (aboutBtn) {
+    rebind(aboutBtn, 'click', function () {
+      openInfoModal('aboutModal');
+    });
+  }
+
   /* Clear Data button — opens modal */
   var clearDataBtn = document.getElementById('clearDataBtn');
   if (clearDataBtn) {
@@ -287,3 +303,45 @@ function openClearConfirmModal(type) {
     }
   };
 }
+
+/**
+ * Open a full-screen info modal (App Guide or About).
+ * @param {string} modalId - DOM id of the modal overlay
+ */
+function openInfoModal(modalId) {
+  var modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.style.display = 'block';
+  modal.classList.remove('closing');
+  SoundEngine.play('tableModal');
+
+  var closeBtn = modal.querySelector('.info-modal-close');
+
+  function closeModal() {
+    modal.classList.add('closing');
+    SoundEngine.play('tableModal');
+    document.removeEventListener('keydown', _infoModalEscapeHandler);
+    _infoModalEscapeHandler = null;
+    setTimeout(function () {
+      modal.style.display = 'none';
+      modal.classList.remove('closing');
+    }, 200);
+  }
+
+  /* Store handler reference on module scope for cleanup by _closeAllInfoModals */
+  _infoModalEscapeHandler = function (e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeModal();
+    }
+  };
+
+  if (closeBtn) closeBtn.onclick = closeModal;
+  modal.onclick = function (e) {
+    if (e.target === modal) closeModal();
+  };
+  document.addEventListener('keydown', _infoModalEscapeHandler);
+}
+
+/* Reference to the active info modal Escape handler for cleanup */
+var _infoModalEscapeHandler = null;
