@@ -194,7 +194,7 @@ function createDrillEngine(container, opts) {
       if (reviewMode && count < reviewOriginalCount * 2) {
         var isDuplicate = false;
         for (var ri = current + 1; ri < questions.length; ri++) {
-          if (questions[ri].question === q.question) {
+          if (questions[ri].question === q.question && String(questions[ri].answer) === String(q.answer)) {
             isDuplicate = true;
             break;
           }
