@@ -3,7 +3,7 @@
  * Caches all assets for offline use.
  */
 
-var CACHE_NAME = 'quant-reflex-v27';
+var CACHE_NAME = 'quant-reflex-v28';
 
 var ASSETS = [
   './',
@@ -27,6 +27,11 @@ var ASSETS = [
   './manifest.json',
   './icons/icon-192.svg',
   './icons/icon-512.svg',
+  './appicons/tab/hometab.svg',
+  './appicons/tab/learntab.svg',
+  './appicons/tab/practicetab.svg',
+  './appicons/tab/settingstab.svg',
+  './appicons/tab/statstab.svg',
   './sounds/drillend.mp3',
   './sounds/settingstoggle.mp3',
   './sounds/tablemodalopeningandclosing.mp3',
