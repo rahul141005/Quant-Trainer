@@ -522,10 +522,14 @@ var FirestoreSync = (function () {
      */
     updateProfileName: function (name) {
       if (!name) return;
+      var profile;
       if (_memoryCache && _memoryCache.profile) {
         _memoryCache.profile.name = name;
+        profile = _memoryCache.profile;
+      } else {
+        profile = { name: name };
       }
-      queueUpdate('profile', _memoryCache ? _memoryCache.profile : { name: name });
+      queueUpdate('profile', profile);
     }
   };
 })();

@@ -876,6 +876,8 @@ body.dark-mode .settings-row-block h3 {
 .home-greeting {
   color: #64748b;
   margin-top: .35rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 body.dark-mode .home-greeting {
   color: #94a3b8;
@@ -1214,7 +1216,7 @@ body.dark-mode .info-quote p { color: #94a3b8; }
   gap: .5rem;
 }
 .category-stat-row:last-child { border-bottom: none; }
-.cat-name { color: #0f172a; font-weight: 500; text-transform: capitalize; min-width: 5rem; font-size: .85rem; }
+.cat-name { color: #0f172a; font-weight: 500; text-transform: capitalize; min-width: 5rem; max-width: 9rem; font-size: .85rem; }
 .cat-accuracy { color: #2563eb; font-weight: 700; white-space: nowrap; font-size: .85rem; }
 
 /* Category accuracy bar */
@@ -1796,6 +1798,24 @@ body.dark-mode .analytics-card {
   position: relative;
   border: 1.5px dashed rgba(148,163,184,.5);
   box-shadow: none;
+}
+.mode-card-teaser::after {
+  content: 'Coming Soon';
+  position: absolute;
+  top: .5rem;
+  right: .65rem;
+  font-size: .6rem;
+  font-weight: 700;
+  color: #64748b;
+  background: rgba(226,232,240,.7);
+  padding: .15rem .45rem;
+  border-radius: .35rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+body.dark-mode .mode-card-teaser::after {
+  background: rgba(51,65,85,.7);
+  color: #94a3b8;
 }
 .mode-card-teaser h3 {
   color: #94a3b8;

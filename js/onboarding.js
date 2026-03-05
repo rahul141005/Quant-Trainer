@@ -322,13 +322,16 @@ var Onboarding = (function () {
   }
 
   function _screen5() {
+    var title = _userName
+      ? _userName + ', are you ready to train?'
+      : 'Ready to Train Your Brain?';
     return '<div class="onboarding-visual">' +
       '<div class="onboarding-icon-anim">' +
       '<span class="onboarding-icon-main">🚀</span>' +
       '<span class="onboarding-icon-sparkle onboarding-sparkle-1">💪</span>' +
       '<span class="onboarding-icon-sparkle onboarding-sparkle-2">🔥</span>' +
       '</div></div>' +
-      '<h2 class="onboarding-title">Ready to Train Your Brain?</h2>' +
+      '<h2 class="onboarding-title">' + title + '</h2>' +
       '<p class="onboarding-desc">Your daily goal is set. Let\'s start your first question.</p>' +
       '<div class="onboarding-actions">' +
       '<button class="btn accent onboarding-next-btn" id="obNext">Start Training</button>' +

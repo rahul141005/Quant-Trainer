@@ -658,9 +658,10 @@ document.addEventListener('DOMContentLoaded', function () {
     _hideAppLoader();
     if (container) container.style.display = '';
     if (bottomNav) bottomNav.style.display = '';
-    /* Re-render current view to reflect loaded data */
-    var currentView = Router.getCurrentView();
-    if (currentView) Router.showView(currentView);
+    /* Re-render current view to reflect loaded data.
+       Fall back to 'home' if Router hasn't initialized yet. */
+    var currentView = Router.getCurrentView() || 'home';
+    Router.showView(currentView);
   }
 
   /**
@@ -1313,7 +1314,7 @@ function renderStatsView() {
     var strengthLabel = '';
     if (barWidth >= 85) { barClass += 'cat-bar-high'; strengthLabel = '<span class="category-strength-label strength-strong">Strong</span>'; }
     else if (barWidth >= 65) { barClass += 'cat-bar-mid'; strengthLabel = '<span class="category-strength-label strength-moderate">Moderate</span>'; }
-    else if (barWidth >= 40) { barClass += 'cat-bar-low'; strengthLabel = '<span class="category-strength-label strength-moderate">Moderate</span>'; }
+    else if (barWidth >= 40) { barClass += 'cat-bar-low'; strengthLabel = '<span class="category-strength-label strength-weak">Weak</span>'; }
     else { barClass += 'cat-bar-weak'; strengthLabel = '<span class="category-strength-label strength-weak">Weak</span>'; }
     html +=
       '<div class="category-stat-row">' +
