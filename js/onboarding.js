@@ -133,6 +133,7 @@ var Onboarding = (function () {
   /**
    * Show/hide the bottom nav for Screen 3 guidance.
    * When visible, only the Stats tab is shown and highlighted.
+   * Nav links are display-only (no click navigation) during onboarding.
    */
   function _showStatsNavGuide() {
     var bottomNav = document.querySelector('.bottom-nav');
@@ -149,6 +150,8 @@ var Onboarding = (function () {
     }
     bottomNav.style.display = 'flex';
     bottomNav.style.zIndex = '10001';
+    /* Prevent actual navigation — visual guide only */
+    bottomNav.style.pointerEvents = 'none';
   }
 
   /**
@@ -163,7 +166,8 @@ var Onboarding = (function () {
       links[i].classList.remove('active');
     }
     bottomNav.style.zIndex = '';
-    /* Hide nav during onboarding (it's normally hidden) */
+    bottomNav.style.pointerEvents = '';
+    /* Restore nav to its normal display (visible behind the overlay) */
     bottomNav.style.display = '';
   }
 
@@ -531,6 +535,7 @@ var Onboarding = (function () {
   function _finish() {
     _markCompleted();
     _cleanupNumpad();
+    _hideStatsNavGuide();
 
     /* Fade out the overlay */
     if (_overlay) {
@@ -551,6 +556,7 @@ var Onboarding = (function () {
   function _finishToPractice() {
     _markCompleted();
     _cleanupNumpad();
+    _hideStatsNavGuide();
 
     /* Fade out the overlay */
     if (_overlay) {

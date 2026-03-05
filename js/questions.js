@@ -279,7 +279,10 @@ function genAverageMissing() {
   if (missing <= 0 || missing > 200) {
     /* Fallback: adjust last known number to make missing value reasonable */
     var target = randInt(Math.max(1, avg - 20), avg + 20);
-    nums[nums.length - 1] = totalSum - (partialSum - nums[nums.length - 1]) - target;
+    var newLast = totalSum - (partialSum - nums[nums.length - 1]) - target;
+    /* Ensure the adjusted number stays positive */
+    if (newLast <= 0) return genAverage();
+    nums[nums.length - 1] = newLast;
     partialSum = nums.reduce(function (a, b) { return a + b; }, 0);
     missing = totalSum - partialSum;
     /* Final fallback */
