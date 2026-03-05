@@ -15,6 +15,7 @@ var ASSETS = [
   './js/app.js',
   './js/router.js',
   './js/drill-engine.js',
+  './js/onboarding.js',
   './js/questions.js',
   './js/progress.js',
   './js/tables.js',
