@@ -170,6 +170,15 @@ function _exitDrillSession() {
   hideCustomNumpad();
 }
 
+/* Prevent accidental page close / tab close during active drill sessions */
+window.addEventListener('beforeunload', function (e) {
+  if (_drillSessionActive) {
+    e.preventDefault();
+    /* Modern browsers require returnValue to be set */
+    e.returnValue = '';
+  }
+});
+
 /**
  * Close all open info modals (App Guide, About).
  * Called on navigation to prevent stale modals.
@@ -1121,6 +1130,10 @@ function renderStatsView() {
   if (!catContainer) return;
   var cats = p.categoryStats || {};
   var keys = Object.keys(cats);
+
+  /* Filter out invalid categories (e.g. legacy "onboarding" entries) */
+  keys = keys.filter(function (k) { return !_INVALID_CATEGORIES || !_INVALID_CATEGORIES[k]; });
+
   if (keys.length === 0) {
     catContainer.innerHTML = '<p class="secondary-text">Start practicing to see category-wise performance.</p>';
     return;

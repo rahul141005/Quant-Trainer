@@ -200,6 +200,9 @@ function getAvgResponseTime() {
   return (sum / times.length).toFixed(1);
 }
 
+/** Categories that are not valid for analytics (e.g. from legacy data) */
+var _INVALID_CATEGORIES = { onboarding: true };
+
 /** Get weakest category (lowest accuracy with at least 10 attempts) */
 function getWeakestCategory() {
   var p = loadProgress();
@@ -208,6 +211,7 @@ function getWeakestCategory() {
   var worst = null;
   var worstAcc = 101;
   for (var i = 0; i < keys.length; i++) {
+    if (_INVALID_CATEGORIES[keys[i]]) continue;
     var c = cats[keys[i]];
     var attempted = parseInt(c.attempted) || 0;
     var correct = parseInt(c.correct) || 0;
@@ -230,6 +234,7 @@ function getStrongestCategory() {
   var best = null;
   var bestAcc = -1;
   for (var i = 0; i < keys.length; i++) {
+    if (_INVALID_CATEGORIES[keys[i]]) continue;
     var c = cats[keys[i]];
     var attempted = parseInt(c.attempted) || 0;
     var correct = parseInt(c.correct) || 0;

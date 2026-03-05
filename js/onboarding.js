@@ -158,6 +158,9 @@ var Onboarding = (function () {
 
   /**
    * Restore the bottom nav to its normal state after Screen 3.
+   * Only resets the styles added by _showStatsNavGuide (zIndex, pointerEvents,
+   * per-link display/active) — does NOT touch the nav's own display property
+   * since onboarding runs before the main app is revealed.
    */
   function _hideStatsNavGuide() {
     var bottomNav = document.querySelector('.bottom-nav');
@@ -169,8 +172,9 @@ var Onboarding = (function () {
     }
     bottomNav.style.zIndex = '';
     bottomNav.style.pointerEvents = '';
-    /* Restore nav to its default CSS display state */
-    bottomNav.style.display = '';
+    /* Hide the nav again — it was temporarily shown for Screen 3 guidance.
+       The main app's _revealMainApp() will unhide it when onboarding completes. */
+    bottomNav.style.display = 'none';
   }
 
   /**
@@ -570,11 +574,11 @@ var Onboarding = (function () {
       }, 300);
     }
 
-    /* Navigate to Practice tab instead of Home */
+    /* Reveal the main app first (via the onComplete callback),
+       then navigate to Practice tab */
+    if (_onComplete) _onComplete();
     if (typeof Router !== 'undefined') {
       Router.showView('practice');
-    } else if (_onComplete) {
-      _onComplete();
     }
   }
 
