@@ -124,6 +124,22 @@ function initSettingsView() {
     notifToggle.checked = notifEnabled;
   }
 
+  /* App Guide button — opens modal */
+  var appGuideBtn = document.getElementById('openAppGuide');
+  if (appGuideBtn) {
+    rebind(appGuideBtn, 'click', function () {
+      openInfoModal('appGuideModal');
+    });
+  }
+
+  /* About button — opens modal */
+  var aboutBtn = document.getElementById('openAbout');
+  if (aboutBtn) {
+    rebind(aboutBtn, 'click', function () {
+      openInfoModal('aboutModal');
+    });
+  }
+
   /* Clear Data button — opens modal */
   var clearDataBtn = document.getElementById('clearDataBtn');
   if (clearDataBtn) {
@@ -285,5 +301,31 @@ function openClearConfirmModal(type) {
         window.location.reload();
       }
     }
+  };
+}
+
+/**
+ * Open a full-screen info modal (App Guide or About).
+ * @param {string} modalId - DOM id of the modal overlay
+ */
+function openInfoModal(modalId) {
+  var modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.style.display = 'block';
+  modal.classList.remove('closing');
+
+  var closeBtn = modal.querySelector('.info-modal-close');
+
+  function closeModal() {
+    modal.classList.add('closing');
+    setTimeout(function () {
+      modal.style.display = 'none';
+      modal.classList.remove('closing');
+    }, 200);
+  }
+
+  if (closeBtn) closeBtn.onclick = closeModal;
+  modal.onclick = function (e) {
+    if (e.target === modal) closeModal();
   };
 }
