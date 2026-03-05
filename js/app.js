@@ -856,7 +856,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof FirestoreSync !== 'undefined' && FirestoreSync._getCache) {
           var cache = FirestoreSync._getCache();
           if (cache && cache.profile && cache.profile.name) {
-            userName = cache.profile.name;
+            userName = String(cache.profile.name).trim();
           }
         }
       } catch (_) {}
