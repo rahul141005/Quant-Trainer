@@ -61,7 +61,7 @@ body {
 * { scrollbar-width: none; }
 body.loaded { opacity: 1; }
 
-/* ---- App Loading Indicator ---- */
+/* ---- App Loading Indicator — Brain Animation ---- */
 .app-loader {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -73,23 +73,55 @@ body.loaded { opacity: 1; }
   transition: opacity .3s ease;
 }
 body.dark-mode .app-loader { background: #0f172a; }
-.app-loader-content { text-align: center; }
-.app-loader-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  animation: loaderPulse 1.5s ease-in-out infinite;
+.app-loader-content {
+  text-align: center;
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-@keyframes loaderPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+.app-loader-brain {
+  font-size: 3.5rem;
+  animation: brainPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(37,99,235,.35));
+  z-index: 2;
+}
+@keyframes brainPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(37,99,235,.25)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 18px rgba(37,99,235,.5)); }
+}
+.app-loader-symbols {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+}
+.floating-symbol {
+  position: absolute;
+  top: 50%; left: 50%;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2563eb;
+  opacity: 0;
+  animation: floatSymbol var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+}
+body.dark-mode .floating-symbol { color: #60a5fa; }
+@keyframes floatSymbol {
+  0% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0); }
+  20% { opacity: .7; }
+  80% { opacity: .7; }
+  100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--x, 0), var(--y, 0)); }
 }
 .app-loader-spinner {
-  width: 28px; height: 28px;
+  width: 24px; height: 24px;
   border: 3px solid #e2e8f0;
   border-top-color: #2563eb;
   border-radius: 50%;
   animation: loaderSpin .8s linear infinite;
-  margin: 0 auto;
+  margin: .75rem auto 0;
+  z-index: 2;
 }
 body.dark-mode .app-loader-spinner {
   border-color: #334155;
@@ -1638,7 +1670,13 @@ body.dark-mode .table-modal-title {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: .65rem;
-  margin-top: .75rem;
+  margin-top: .5rem;
+}
+.stat-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.stat-grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 .stat-card {
   background: #f1f5f9;
@@ -1650,29 +1688,84 @@ body.dark-mode .table-modal-title {
   align-items: center;
   justify-content: center;
   min-height: 4.5rem;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat-card:active {
+  transform: scale(.97);
 }
 .stat-card .value {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2563eb;
   line-height: 1.2;
 }
+.stat-grid-3 .stat-card .value {
+  font-size: 1.3rem;
+}
 .stat-card .label {
-  font-size: .75rem;
+  font-size: .72rem;
   color: #64748b;
   margin-top: .3rem;
   line-height: 1.3;
 }
 .stat-card .value-sm {
-  font-size: .95rem;
+  font-size: .85rem;
   word-break: break-word;
 }
 .stat-card.highlight { border-left: 3px solid #2563eb; }
+.stat-card-positive { border-left: 3px solid #16a34a; }
+.stat-card-positive .value { color: #16a34a; }
+.stat-card-negative { border-left: 3px solid #dc2626; }
+.stat-card-negative .value { color: #dc2626; }
 .stat-hint {
-  font-size: .7rem;
+  font-size: .65rem;
   color: #94a3b8;
   margin-top: .25rem;
   line-height: 1.3;
+}
+
+/* ---- Analytics Dashboard Sections ---- */
+.analytics-section {
+  margin-bottom: 1.5rem;
+}
+.analytics-section-title {
+  font-size: .8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .5rem;
+  padding-left: .25rem;
+}
+body.dark-mode .analytics-section-title {
+  color: #94a3b8;
+}
+.analytics-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: .75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+body.dark-mode .analytics-card {
+  background: #1e293b;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+
+/* ---- Practice Mode Teaser Card ---- */
+.mode-card-teaser {
+  opacity: .55;
+  position: relative;
+}
+.mode-card-teaser h3 {
+  color: #94a3b8;
+}
+.mode-card-teaser p {
+  color: #94a3b8;
+  font-style: italic;
+}
+body.dark-mode .mode-card-teaser h3,
+body.dark-mode .mode-card-teaser p {
+  color: #64748b;
 }
 
 /* ---- Quick Links Edit Button ---- */

@@ -15,7 +15,15 @@
   <!-- ==================== LOADING INDICATOR ==================== -->
   <div id="appLoader" class="app-loader">
     <div class="app-loader-content">
-      <div class="app-loader-icon">🧠</div>
+      <div class="app-loader-brain">🧠</div>
+      <div class="app-loader-symbols">
+        <span class="floating-symbol" style="--delay:0s;--x:-40px;--y:-60px;--dur:3.5s;">+</span>
+        <span class="floating-symbol" style="--delay:.4s;--x:50px;--y:-40px;--dur:4s;">−</span>
+        <span class="floating-symbol" style="--delay:.8s;--x:-55px;--y:30px;--dur:3.8s;">×</span>
+        <span class="floating-symbol" style="--delay:1.2s;--x:45px;--y:50px;--dur:4.2s;">÷</span>
+        <span class="floating-symbol" style="--delay:1.6s;--x:0px;--y:-70px;--dur:3.6s;">%</span>
+        <span class="floating-symbol" style="--delay:2s;--x:-60px;--y:0px;--dur:4.5s;">=</span>
+      </div>
       <div class="app-loader-spinner"></div>
     </div>
   </div>
@@ -193,6 +201,11 @@
           <h3>🔄 Review Mistakes</h3>
           <p>Practice your previously wrong answers</p>
         </div>
+
+        <div class="mode-card mode-card-teaser" data-mode="wordproblems">
+          <h3>🔒 Word Problems</h3>
+          <p>Coming in a future update.</p>
+        </div>
       </div>
 
       <!-- Category selection (shown when Focus Training is picked) -->
@@ -344,19 +357,55 @@
 
     <!-- ==================== STATS VIEW ==================== -->
     <div id="view-stats" class="spa-view">
-      <header><h1>📊 Stats</h1></header>
+      <header><h1>📊 Analytics</h1></header>
 
-      <!-- Overall Stats -->
-      <div class="card">
-        <h3 class="section-title">Overall Performance</h3>
-        <div class="stat-grid" id="statsGrid"></div>
+      <!-- Section 1 — Practice Overview -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Practice Overview</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-3" id="statsPracticeOverview"></div>
+        </div>
+      </div>
+
+      <!-- Section 2 — Speed & Efficiency -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Speed &amp; Efficiency</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-2" id="statsSpeed"></div>
+        </div>
+      </div>
+
+      <!-- Section 3 — Activity Stats -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Activity Stats</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-2" id="statsActivity"></div>
+        </div>
+      </div>
+
+      <!-- Section 4 — Consistency -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Consistency</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-2" id="statsConsistency"></div>
+        </div>
+      </div>
+
+      <!-- Section 5 — Performance Insights -->
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Performance Insights</h3>
+        <div class="analytics-card">
+          <div class="stat-grid stat-grid-3" id="statsInsights"></div>
+        </div>
       </div>
 
       <!-- Category Performance -->
-      <div class="card">
-        <h3 class="section-title">Category Accuracy</h3>
-        <div id="categoryStats">
-          <p class="secondary-text">Start practicing to see category-wise performance.</p>
+      <div class="analytics-section">
+        <h3 class="analytics-section-title">Category Accuracy</h3>
+        <div class="analytics-card">
+          <div id="categoryStats">
+            <p class="secondary-text">Start practicing to see category-wise performance.</p>
+          </div>
         </div>
       </div>
     </div>
