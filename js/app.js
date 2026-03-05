@@ -1222,9 +1222,15 @@ function renderStatsView() {
         var recentPct = (recentAcc / recentTotal) * 100;
         var olderPct = (olderAcc / olderTotal) * 100;
         var diff = recentPct - olderPct;
-        if (diff > 2) { trend = '📈 Improving'; trendClass = ' stat-card-positive'; }
-        else if (diff < -2) { trend = '📉 Declining'; trendClass = ' stat-card-negative'; }
-        else { trend = '➡️ Steady'; trendClass = ''; }
+        if (diff > 2) {
+          trend = '📈 Improving';
+          trendClass = ' stat-card-positive';
+        } else if (diff < -2) {
+          trend = '📉 Declining';
+          trendClass = ' stat-card-negative';
+        } else {
+          trend = '➡️ Steady';
+        }
       }
     }
   }

@@ -1688,7 +1688,7 @@ body.dark-mode .table-modal-title {
   align-items: center;
   justify-content: center;
   min-height: 4.5rem;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform .2s ease;
 }
 .stat-card:active {
   transform: scale(.97);
