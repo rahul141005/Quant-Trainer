@@ -369,6 +369,51 @@ function genTSD() {
   }
 }
 
+/** Time and Work calculations with simple, clean problems */
+function genTimeWork() {
+  var diff = _getDifficulty();
+  var type = randInt(0, 2);
+
+  if (type === 0) {
+    /* A can do a job in X days, B in Y days. Together in how many days?
+       Pick values that produce clean combined rates. */
+    var a = diff === 'easy' ? pick([2, 3, 4, 6]) : (diff === 'hard' ? pick([5, 6, 8, 10, 12, 15]) : pick([3, 4, 5, 6, 10]));
+    var b = diff === 'easy' ? pick([3, 4, 6]) : (diff === 'hard' ? pick([6, 8, 10, 12, 15, 20]) : pick([4, 5, 6, 10, 12]));
+    if (a === b) b = a + pick([1, 2, 3]);
+    /* Combined rate = 1/a + 1/b = (a+b)/(a*b) → together = (a*b)/(a+b) */
+    var product = a * b;
+    var sum = a + b;
+    /* Only use questions with clean integer answers */
+    if (product % sum !== 0) {
+      /* Fall back to a known-good pair: 6 and 3 → (6×3)/(6+3) = 18/9 = 2 days */
+      a = 6; b = 3;
+      product = 18; sum = 9;
+    }
+    var together = product / sum;
+    return { question: 'A does a job in ' + a + ' days, B in ' + b + ' days. Together = ? days', answer: together, category: 'time-and-work' };
+  } else if (type === 1) {
+    /* A can do a job in X days. How much work in Y days? (fraction as percentage) */
+    var days = diff === 'easy' ? pick([2, 4, 5, 10]) : (diff === 'hard' ? pick([5, 8, 10, 20, 25]) : pick([4, 5, 8, 10]));
+    var workDays = randInt(1, Math.min(days - 1, 4));
+    var pct = Math.round((workDays / days) * 100);
+    return { question: 'A does a job in ' + days + ' days. Work done in ' + workDays + ' days = ?%', answer: pct, category: 'time-and-work' };
+  } else {
+    /* If 5 workers do a job in X days, how many days for Y workers? */
+    var workers1 = diff === 'easy' ? pick([2, 3, 4, 5]) : (diff === 'hard' ? pick([4, 5, 6, 8, 10]) : pick([3, 4, 5, 6]));
+    var daysPer = diff === 'easy' ? pick([4, 6, 8, 10, 12]) : (diff === 'hard' ? pick([6, 8, 10, 12, 15, 20]) : pick([6, 8, 10, 12]));
+    /* Total work units = workers1 × daysPer; pick workers2 that divides evenly */
+    var totalWork = workers1 * daysPer;
+    var possibleWorkers = [];
+    for (var w = 2; w <= 20; w++) {
+      if (totalWork % w === 0 && w !== workers1) possibleWorkers.push(w);
+    }
+    if (possibleWorkers.length === 0) possibleWorkers.push(workers1 * 2);
+    var workers2 = pick(possibleWorkers);
+    var answer = totalWork / workers2;
+    return { question: workers1 + ' workers finish in ' + daysPer + ' days. ' + workers2 + ' workers finish in ? days', answer: answer, category: 'time-and-work' };
+  }
+}
+
 /* ---- category map for focus training ---- */
 var categoryGenerators = {
   squares: genSquare,
@@ -379,13 +424,14 @@ var categoryGenerators = {
   ratios: genRatio,
   averages: genAverage,
   'profit-loss': genProfitLoss,
-  'time-speed-distance': genTSD
+  'time-speed-distance': genTSD,
+  'time-and-work': genTimeWork
 };
 
 /* ---- public API ---- */
 
 var generators = [genSquare, genCube, genFraction, genPercentage, genMultiplication,
-  genRatio, genAverage, genProfitLoss, genTSD];
+  genRatio, genAverage, genProfitLoss, genTSD, genTimeWork];
 
 /**
  * Generate a single random question (all categories).

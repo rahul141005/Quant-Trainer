@@ -96,9 +96,11 @@ function createDrillEngine(container, opts) {
         '<button id="submitBtn" class="btn accent">Submit</button>' +
       '</div>';
 
-    /* Exit button handler */
+    /* Exit button handler — uses custom in-app dialog to prevent
+       the TWA/WebView bug where native confirm() can end the session
+       even when Cancel is pressed */
     container.querySelector('#drillExitBtn').addEventListener('click', function () {
-      if (confirm(_exitSessionMsg)) {
+      function performExit() {
         cleanup();
         _exitDrillSession();
         /* End Firestore batch that was started in begin() */
@@ -110,6 +112,12 @@ function createDrillEngine(container, opts) {
         } else {
           Router.showView('practice');
         }
+      }
+
+      if (typeof showExitSessionDialog === 'function') {
+        showExitSessionDialog(performExit);
+      } else if (confirm(_exitSessionMsg)) {
+        performExit();
       }
     });
 

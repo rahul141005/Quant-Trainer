@@ -32,24 +32,26 @@ var Onboarding = (function () {
   var _questionAttempt = 0;       /* 0-based: tracks which attempt (0, 1, 2) */
   var _currentQuestion = null;    /* current question object {text, answer} */
 
-  /* Simple easy questions for the first question screen — very easy only */
+  /* Simple easy questions for the first question screen — very easy only.
+     Each question has a real category so analytics are accurate.
+     No addition or subtraction — only question types users will practice. */
   var EASY_QUESTIONS = [
-    { text: '12 × 5 = ?', answer: 60 },
-    { text: '8 × 7 = ?', answer: 56 },
-    { text: '15 × 4 = ?', answer: 60 },
-    { text: '9 × 6 = ?', answer: 54 },
-    { text: '11 × 3 = ?', answer: 33 },
-    { text: '25 × 2 = ?', answer: 50 },
-    { text: '7 + 8 = ?', answer: 15 },
-    { text: '14 + 9 = ?', answer: 23 },
-    { text: '6 × 4 = ?', answer: 24 },
-    { text: '5 × 9 = ?', answer: 45 },
-    { text: '10 + 15 = ?', answer: 25 },
-    { text: '3 × 8 = ?', answer: 24 },
-    { text: '20 + 13 = ?', answer: 33 },
-    { text: '7 × 5 = ?', answer: 35 },
-    { text: '50% of 40 = ?', answer: 20 },
-    { text: '10% of 90 = ?', answer: 9 }
+    { text: '12 × 5 = ?', answer: 60, category: 'multiplication' },
+    { text: '8 × 7 = ?', answer: 56, category: 'multiplication' },
+    { text: '15 × 4 = ?', answer: 60, category: 'multiplication' },
+    { text: '9 × 6 = ?', answer: 54, category: 'multiplication' },
+    { text: '11 × 3 = ?', answer: 33, category: 'multiplication' },
+    { text: '25 × 2 = ?', answer: 50, category: 'multiplication' },
+    { text: '6 × 4 = ?', answer: 24, category: 'multiplication' },
+    { text: '5 × 9 = ?', answer: 45, category: 'multiplication' },
+    { text: '3 × 8 = ?', answer: 24, category: 'multiplication' },
+    { text: '7 × 5 = ?', answer: 35, category: 'multiplication' },
+    { text: '50% of 40 = ?', answer: 20, category: 'percentages' },
+    { text: '10% of 90 = ?', answer: 9, category: 'percentages' },
+    { text: '25% of 80 = ?', answer: 20, category: 'percentages' },
+    { text: '5² = ?', answer: 25, category: 'squares' },
+    { text: '7² = ?', answer: 49, category: 'squares' },
+    { text: '2³ = ?', answer: 8, category: 'cubes' }
   ];
 
   /**
@@ -156,6 +158,9 @@ var Onboarding = (function () {
 
   /**
    * Restore the bottom nav to its normal state after Screen 3.
+   * Only resets the styles added by _showStatsNavGuide (zIndex, pointerEvents,
+   * per-link display/active) — does NOT touch the nav's own display property
+   * since onboarding runs before the main app is revealed.
    */
   function _hideStatsNavGuide() {
     var bottomNav = document.querySelector('.bottom-nav');
@@ -167,8 +172,9 @@ var Onboarding = (function () {
     }
     bottomNav.style.zIndex = '';
     bottomNav.style.pointerEvents = '';
-    /* Restore nav to its default CSS display state */
-    bottomNav.style.display = '';
+    /* Hide the nav again — it was temporarily shown for Screen 3 guidance.
+       The main app's _revealMainApp() will unhide it when onboarding completes. */
+    bottomNav.style.display = 'none';
   }
 
   /**
@@ -428,15 +434,16 @@ var Onboarding = (function () {
 
     var isCorrect = parseInt(userAnswer, 10) === correctAnswer;
 
-    /* Record in analytics via progress.js */
+    /* Record in analytics via progress.js — use the question's actual category */
     if (typeof recordAnswer === 'function') {
       var questionText = qScreen.querySelector('.onboarding-q-text');
+      var actualCategory = _currentQuestion ? _currentQuestion.category : 'multiplication';
       var qData = {
         question: questionText ? questionText.textContent : '',
         answer: correctAnswer,
-        category: 'onboarding'
+        category: actualCategory
       };
-      recordAnswer(isCorrect, 'onboarding', isCorrect ? null : qData);
+      recordAnswer(isCorrect, actualCategory, isCorrect ? null : qData);
     }
 
     if (isCorrect) {
@@ -567,11 +574,11 @@ var Onboarding = (function () {
       }, 300);
     }
 
-    /* Navigate to Practice tab instead of Home */
+    /* Reveal the main app first (via the onComplete callback),
+       then navigate to Practice tab */
+    if (_onComplete) _onComplete();
     if (typeof Router !== 'undefined') {
       Router.showView('practice');
-    } else if (_onComplete) {
-      _onComplete();
     }
   }
 

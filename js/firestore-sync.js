@@ -23,7 +23,31 @@ var FirestoreSync = (function () {
   var _memoryCache = null; /* In-memory cache of the user document */
   var _dataLoaded = false; /* Whether initial load has completed */
   var _drillActive = false; /* Whether a drill is in progress (defers syncing) */
+  var _loadedUserId = null; /* UID whose data is currently loaded — detects user switches */
   var SYNC_DEBOUNCE_MS = 2000; /* batch updates every 2 seconds */
+
+  /* All localStorage keys that store user-specific data */
+  var _USER_STORAGE_KEYS = [
+    'quant_reflex_settings',
+    'quant_reflex_progress',
+    'quant_quick_links',
+    'quant_custom_topics',
+    'quant_custom_formulas',
+    'quant_bookmarks',
+    'quant_notifications_enabled'
+  ];
+
+  /**
+   * Remove all user-related keys from localStorage.
+   * Prevents data from one user leaking to another session.
+   */
+  function _clearUserLocalStorage() {
+    try {
+      for (var i = 0; i < _USER_STORAGE_KEYS.length; i++) {
+        localStorage.removeItem(_USER_STORAGE_KEYS[i]);
+      }
+    } catch (_) {}
+  }
 
   /**
    * Get the Firestore document reference for the current authenticated user.
@@ -39,24 +63,46 @@ var FirestoreSync = (function () {
 
   /**
    * Reset the sync state when user logs out.
+   * Flushes any pending writes for the current user, then clears all
+   * in-memory caches AND user-related localStorage keys so no data
+   * leaks to the next session.
    */
   function resetSyncState() {
+    /* Flush any pending writes for the current user before clearing */
+    if (Object.keys(_pendingUpdates).length > 0) {
+      _flushUpdates();
+    }
+
     _memoryCache = null;
     _dataLoaded = false;
     _pendingUpdates = {};
+    _drillActive = false;
+    _loadedUserId = null;
     if (_syncTimer) {
       clearTimeout(_syncTimer);
       _syncTimer = null;
     }
+
+    /* Clear all user-related localStorage keys to prevent data leakage */
+    _clearUserLocalStorage();
   }
 
   /**
    * Load all user data from Firestore and merge into localStorage.
    * Uses in-memory cache to prevent duplicate reads within the same session.
    * Called on app startup after authentication.
+   * Clears stale localStorage data before loading to prevent cross-user leakage.
    * @param {function} [callback] - Optional callback when done
    */
   function loadFromFirestore(callback) {
+    var currentUserId = FirebaseApp.getUserId();
+
+    /* If a different user is now authenticated, force a full reset so we
+       never serve stale data from the previous user's cache. */
+    if (_loadedUserId && currentUserId && _loadedUserId !== currentUserId) {
+      resetSyncState();
+    }
+
     /* Return cached data if already loaded this session */
     if (_dataLoaded && _memoryCache) {
       if (callback) callback(true);
@@ -69,11 +115,17 @@ var FirestoreSync = (function () {
       return;
     }
 
+    /* Clear stale localStorage before loading the authenticated user's data.
+       This prevents the previous user's cached data from being displayed
+       before Firestore responds. */
+    _clearUserLocalStorage();
+
     docRef.get().then(function (doc) {
       if (doc.exists) {
         var data = doc.data();
         _memoryCache = data;
         _dataLoaded = true;
+        _loadedUserId = currentUserId;
         /* Merge Firestore data into localStorage (Firestore is source of truth) */
         if (data.settings) {
           try { localStorage.setItem('quant_reflex_settings', JSON.stringify(data.settings)); } catch (_) {}
@@ -96,6 +148,7 @@ var FirestoreSync = (function () {
       } else {
         /* First time: create document with default data */
         _createDefaultDocument();
+        _loadedUserId = currentUserId;
       }
       if (callback) callback(true);
     }).catch(function (err) {
@@ -107,7 +160,8 @@ var FirestoreSync = (function () {
 
   /**
    * Create a default Firestore document for a new user.
-   * Pushes existing local data or initializes with defaults.
+   * Always uses clean defaults — never reads from localStorage to prevent
+   * data leakage from a previously logged-in user.
    */
   function _createDefaultDocument() {
     var docRef = _getUserDocRef();
@@ -141,59 +195,18 @@ var FirestoreSync = (function () {
       bookmarks: []
     };
 
-    /* Override defaults with any existing local data — validate types to prevent
-       corrupted localStorage from polluting Firestore */
-    try {
-      var localSettings = localStorage.getItem('quant_reflex_settings');
-      if (localSettings) {
-        var parsedSettings = JSON.parse(localSettings);
-        if (parsedSettings && typeof parsedSettings === 'object' && !Array.isArray(parsedSettings)) {
-          defaults.settings = parsedSettings;
-        }
-      }
-    } catch (_) {}
-    try {
-      var localStats = localStorage.getItem('quant_reflex_progress');
-      if (localStats) {
-        var parsedStats = JSON.parse(localStats);
-        if (parsedStats && typeof parsedStats === 'object' && !Array.isArray(parsedStats) && typeof parsedStats.totalAttempted === 'number') {
-          defaults.stats = parsedStats;
-        }
-      }
-    } catch (_) {}
-    try {
-      var localLinks = localStorage.getItem('quant_quick_links');
-      if (localLinks) {
-        var parsedLinks = JSON.parse(localLinks);
-        if (Array.isArray(parsedLinks)) defaults.quickLinks = parsedLinks;
-      }
-    } catch (_) {}
-    try {
-      var localTopics = localStorage.getItem('quant_custom_topics');
-      if (localTopics) {
-        var parsedTopics = JSON.parse(localTopics);
-        if (Array.isArray(parsedTopics)) defaults.customTopics = parsedTopics;
-      }
-    } catch (_) {}
-    try {
-      var localFormulas = localStorage.getItem('quant_custom_formulas');
-      if (localFormulas) {
-        var parsedFormulas = JSON.parse(localFormulas);
-        if (parsedFormulas && typeof parsedFormulas === 'object' && !Array.isArray(parsedFormulas)) {
-          defaults.customFormulas = parsedFormulas;
-        }
-      }
-    } catch (_) {}
-    try {
-      var localBookmarks = localStorage.getItem('quant_bookmarks');
-      if (localBookmarks) {
-        var parsedBookmarks = JSON.parse(localBookmarks);
-        if (Array.isArray(parsedBookmarks)) defaults.bookmarks = parsedBookmarks;
-      }
-    } catch (_) {}
-
     _memoryCache = defaults;
     _dataLoaded = true;
+
+    /* Write clean defaults to localStorage so the app has consistent state */
+    try {
+      localStorage.setItem('quant_reflex_settings', JSON.stringify(defaults.settings));
+      localStorage.setItem('quant_reflex_progress', JSON.stringify(defaults.stats));
+      localStorage.setItem('quant_quick_links', JSON.stringify(defaults.quickLinks));
+      localStorage.setItem('quant_custom_topics', JSON.stringify(defaults.customTopics));
+      localStorage.setItem('quant_custom_formulas', JSON.stringify(defaults.customFormulas));
+      localStorage.setItem('quant_bookmarks', JSON.stringify(defaults.bookmarks));
+    } catch (_) {}
 
     docRef.set(defaults, { merge: true }).catch(function (err) {
       console.warn('Firestore default document creation failed:', err);
