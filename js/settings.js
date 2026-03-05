@@ -153,14 +153,15 @@ function initSettingsView() {
   if (logoutBtn) {
     rebind(logoutBtn, 'click', function () {
       if (typeof Auth !== 'undefined') {
+        /* Flush pending Firestore writes and clear local state BEFORE
+           signing out, while the user context is still valid */
+        if (typeof FirestoreSync !== 'undefined') {
+          FirestoreSync.resetSyncState();
+        }
         Auth.logout(function (err) {
           if (err) {
             alert('Logout failed: ' + err);
           } else {
-            /* Reset sync state before reload */
-            if (typeof FirestoreSync !== 'undefined') {
-              FirestoreSync.resetSyncState();
-            }
             /* Reload page for clean state — auth persistence keeps
                the user logged out, and all JS state is reset */
             window.location.reload();
