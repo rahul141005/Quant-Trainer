@@ -200,7 +200,7 @@ function getAvgResponseTime() {
   return (sum / times.length).toFixed(1);
 }
 
-/** Get weakest category (lowest accuracy with at least 3 attempts) */
+/** Get weakest category (lowest accuracy with at least 10 attempts) */
 function getWeakestCategory() {
   var p = loadProgress();
   var cats = p.categoryStats || {};
@@ -211,7 +211,7 @@ function getWeakestCategory() {
     var c = cats[keys[i]];
     var attempted = parseInt(c.attempted) || 0;
     var correct = parseInt(c.correct) || 0;
-    if (attempted >= 3) {
+    if (attempted >= 10) {
       var acc = (correct / attempted) * 100;
       if (!isNaN(acc) && acc < worstAcc) {
         worstAcc = acc;
@@ -222,7 +222,7 @@ function getWeakestCategory() {
   return worst;
 }
 
-/** Get strongest category (highest accuracy with at least 3 attempts) */
+/** Get strongest category (highest accuracy with at least 10 attempts) */
 function getStrongestCategory() {
   var p = loadProgress();
   var cats = p.categoryStats || {};
@@ -233,7 +233,7 @@ function getStrongestCategory() {
     var c = cats[keys[i]];
     var attempted = parseInt(c.attempted) || 0;
     var correct = parseInt(c.correct) || 0;
-    if (attempted >= 3) {
+    if (attempted >= 10) {
       var acc = (correct / attempted) * 100;
       if (!isNaN(acc) && acc > bestAcc) {
         bestAcc = acc;

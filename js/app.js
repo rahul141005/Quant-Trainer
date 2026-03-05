@@ -501,11 +501,11 @@ document.addEventListener('DOMContentLoaded', function () {
   /**
    * Show the main app and hide the login screen.
    * Loads data from Firestore and initializes the app.
+   * Onboarding is checked before revealing the main app UI
+   * to prevent the main interface from flashing before onboarding.
    */
   function showApp() {
     if (loginScreen) loginScreen.style.display = 'none';
-    if (container) container.style.display = '';
-    if (bottomNav) bottomNav.style.display = '';
 
     /* Load data from Firestore after authentication */
     if (typeof FirestoreSync !== 'undefined' && typeof FirebaseApp !== 'undefined' && FirebaseApp.isReady() && FirebaseApp.getUserId()) {
@@ -516,16 +516,32 @@ document.addEventListener('DOMContentLoaded', function () {
             var s = JSON.parse(localStorage.getItem('quant_reflex_settings') || '{}');
             document.body.classList.toggle('dark-mode', !!s.darkMode);
           } catch (_) { /* ignore */ }
-          /* Re-render current view to reflect loaded data */
-          var currentView = Router.getCurrentView();
-          if (currentView) Router.showView(currentView);
         }
-        /* Check onboarding after Firestore data is loaded */
-        _launchOnboardingIfNeeded();
+        /* Check onboarding BEFORE showing main UI */
+        _launchOnboardingOrShowMain();
       });
     } else {
       /* No Firestore — check onboarding immediately */
-      _launchOnboardingIfNeeded();
+      _launchOnboardingOrShowMain();
+    }
+  }
+
+  /**
+   * Check onboarding: if needed, show it first (main UI stays hidden).
+   * After onboarding completes, reveal the main app.
+   * If no onboarding needed, reveal immediately.
+   */
+  function _launchOnboardingOrShowMain() {
+    if (typeof Onboarding !== 'undefined' && Onboarding.shouldShow()) {
+      /* Show the onboarding overlay without revealing main app behind it */
+      Onboarding.show(function () {
+        /* Onboarding finished — now reveal the main app */
+        _revealMainApp();
+        Router.showView('home');
+      });
+    } else {
+      /* No onboarding needed — reveal immediately */
+      _revealMainApp();
     }
 
     /* Initialize notification scheduling if enabled */
@@ -535,15 +551,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Launch onboarding if it hasn't been completed yet.
+   * Reveal the main app container and bottom nav.
+   * Re-render the current view to reflect loaded data.
    */
-  function _launchOnboardingIfNeeded() {
-    if (typeof Onboarding !== 'undefined' && Onboarding.shouldShow()) {
-      Onboarding.show(function () {
-        /* Onboarding finished — navigate to home */
-        Router.showView('home');
-      });
-    }
+  function _revealMainApp() {
+    if (container) container.style.display = '';
+    if (bottomNav) bottomNav.style.display = '';
+    /* Re-render current view to reflect loaded data */
+    var currentView = Router.getCurrentView();
+    if (currentView) Router.showView(currentView);
   }
 
   /**
@@ -557,8 +573,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ---- Auth Gate ---- */
   if (typeof Auth !== 'undefined' && typeof FirebaseApp !== 'undefined' && FirebaseApp.isReady()) {
-    /* Initially hide app and show login screen */
-    showLogin();
+    /* Keep everything hidden until auth state is determined.
+       This prevents the login screen from flashing for authenticated users. */
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (container) container.style.display = 'none';
+    if (bottomNav) bottomNav.style.display = 'none';
 
     Auth.onAuthReady(function (user) {
       if (user) {
@@ -683,12 +702,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ---- Cleanup drill engine on back/forward navigation ---- */
-  window.addEventListener('popstate', function () {
+  window.addEventListener('popstate', function (e) {
     /* Close any open info modals on navigation */
     _closeAllInfoModals();
     if (_drillSessionActive) {
-      /* Drills only run inside the Practice view, so 'practice' is always correct here */
+      /* Push history state back to prevent the browser from actually navigating away.
+         This must happen before the confirm dialog to keep the URL stable. */
       history.pushState({ view: 'practice' }, '', '#practice');
+
       if (confirm(_exitSessionMsg)) {
         if (_activeDrillEngine) {
           _activeDrillEngine.cleanup();
@@ -701,6 +722,7 @@ document.addEventListener('DOMContentLoaded', function () {
         _exitDrillSession();
         Router.showView('practice');
       }
+      /* If cancelled, session continues — history state is already restored */
       return;
     }
     if (_activeDrillEngine) {
@@ -1074,6 +1096,11 @@ function renderStatsView() {
 
   var statsGrid = document.getElementById('statsGrid');
   if (statsGrid) {
+    /* Show placeholder when not enough attempts for category ranking */
+    var categoryInsightMsg = (!weakest && !strongest && p.totalAttempted < 10) ? 'Solve more questions to unlock category insights.' : '';
+    var weakestDisplay = weakest || (categoryInsightMsg ? '🔒' : '—');
+    var strongestDisplay = strongest || (categoryInsightMsg ? '🔒' : '—');
+
     statsGrid.innerHTML =
       '<div class="stat-card"><div class="value">' + p.totalAttempted + '</div><div class="label">Questions Attempted</div></div>' +
       '<div class="stat-card"><div class="value">' + p.totalCorrect + '</div><div class="label">Correct Answers</div></div>' +
@@ -1084,8 +1111,8 @@ function renderStatsView() {
       '<div class="stat-card"><div class="value">' + (p.dailyStreak || 0) + '</div><div class="label">Daily Streak 🔥</div></div>' +
       '<div class="stat-card"><div class="value">' + (p.todayAttempted || 0) + '</div><div class="label">Today\'s Questions</div></div>' +
       '<div class="stat-card"><div class="value">' + (avgTime || '—') + 's</div><div class="label">Avg Response Time</div></div>' +
-      '<div class="stat-card' + (weakest ? ' highlight' : '') + '"><div class="value value-sm">' + (weakest || '—') + '</div><div class="label">Weakest Category</div></div>' +
-      '<div class="stat-card' + (strongest ? ' highlight' : '') + '"><div class="value value-sm">' + (strongest || '—') + '</div><div class="label">Strongest Category</div></div>' +
+      '<div class="stat-card' + (weakest ? ' highlight' : '') + '"><div class="value value-sm">' + weakestDisplay + '</div><div class="label">Weakest Category</div>' + (categoryInsightMsg && !weakest ? '<div class="stat-hint">' + categoryInsightMsg + '</div>' : '') + '</div>' +
+      '<div class="stat-card' + (strongest ? ' highlight' : '') + '"><div class="value value-sm">' + strongestDisplay + '</div><div class="label">Strongest Category</div>' + (categoryInsightMsg && !strongest ? '<div class="stat-hint">' + categoryInsightMsg + '</div>' : '') + '</div>' +
       '<div class="stat-card"><div class="value value-sm">' + trend + '</div><div class="label">Recent Trend</div></div>';
   }
 
