@@ -785,9 +785,21 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---- Bottom nav click handlers ---- */
   var navLinks = document.querySelectorAll('.bottom-nav a');
   for (var i = 0; i < navLinks.length; i++) {
+    /* Clean up tab-pop class after animation finishes */
+    (function (link) {
+      var icon = link.querySelector('.nav-icon img');
+      if (icon) {
+        icon.addEventListener('animationend', function () {
+          this.classList.remove('tab-pop');
+        });
+      }
+    })(navLinks[i]);
+
     navLinks[i].addEventListener('click', function (e) {
       e.preventDefault();
       var view = this.getAttribute('data-view');
+      /* Skip if already on this tab and no drill is active */
+      if (this.classList.contains('active') && !_drillSessionActive) return;
       /* Cleanup any active drill engine when navigating away */
       if (_activeDrillEngine) {
         _activeDrillEngine.cleanup();
@@ -802,6 +814,13 @@ document.addEventListener('DOMContentLoaded', function () {
       _closeAllInfoModals();
       SoundEngine.play('tabSwitch');
       triggerHaptic(10);
+      /* Trigger icon pop animation */
+      var iconEl = this.querySelector('.nav-icon img');
+      if (iconEl) {
+        iconEl.classList.remove('tab-pop');
+        void iconEl.offsetWidth; /* force reflow to restart animation */
+        iconEl.classList.add('tab-pop');
+      }
       Router.showView(view);
     });
   }
