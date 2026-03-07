@@ -216,7 +216,7 @@ header h1 {
   border: 1px solid rgba(226,232,240,.6);
   display: block;
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition: transform .18s cubic-bezier(.25,.46,.45,.94), box-shadow .18s ease;
 }
 .study-card:active { transform: scale(.97); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 .study-card h3 {
@@ -778,10 +778,10 @@ body.dark-mode .drill-exit-btn:active {
   box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
   border: 1px solid rgba(226,232,240,.6);
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition: transform .18s cubic-bezier(.25,.46,.45,.94), box-shadow .18s ease;
   min-height: 48px;
 }
-.mode-card:active { transform: scale(.97); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.mode-card:active { transform: scale(.97) translateY(1px); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 .mode-card h3 {
   font-size: 1.05rem;
   color: #0f172a;
@@ -809,7 +809,7 @@ body.dark-mode .drill-exit-btn:active {
   font-size: .85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color .2s, background .2s, transform .15s;
+  transition: border-color .2s, background .2s, transform .18s cubic-bezier(.25,.46,.45,.94);
 }
 .category-btn:active {
   background: #eff6ff;
@@ -1012,6 +1012,7 @@ body.reduced-motion .ripple-effect { display: none !important; }
 body.reduced-motion .floating-symbol { display: none !important; }
 body.reduced-motion .app-loader-spinner { animation: none !important; }
 body.reduced-motion .fade-in { animation: none !important; opacity: 1 !important; }
+body.reduced-motion .guide-animate-section { opacity: 1 !important; transform: none !important; }
 
 /* Toggle Switch */
 .toggle {
@@ -1168,7 +1169,7 @@ body.dark-mode .settings-chevron { color: #64748b; }
 
 /* Info modal sections */
 .info-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 .info-section:last-child {
   margin-bottom: 0;
@@ -1293,6 +1294,29 @@ body.dark-mode .info-tip {
 body.dark-mode .info-version { color: #64748b; }
 body.dark-mode .info-quote { border-left-color: #60a5fa; }
 body.dark-mode .info-quote p { color: #94a3b8; }
+
+/* Guide section animations */
+.guide-animate-section {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: guideCardFadeIn .4s ease forwards;
+}
+.guide-animate-section:nth-child(2) { animation-delay: .08s; }
+.guide-animate-section:nth-child(3) { animation-delay: .16s; }
+.guide-animate-section:nth-child(4) { animation-delay: .24s; }
+.guide-animate-section:nth-child(5) { animation-delay: .32s; }
+.guide-animate-section:nth-child(6) { animation-delay: .40s; }
+@keyframes guideCardFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Info block tap feedback */
+.info-block {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.info-block:active {
+  transform: scale(.98);
+}
 
 /* ---- Category Stats (Stats page) ---- */
 .category-stats-list { margin-top: .5rem; }
@@ -1832,6 +1856,7 @@ body.dark-mode .table-modal-title {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  letter-spacing: -.02em;
 }
 .stat-grid-3 .stat-card .value {
   font-size: 1.25rem;
@@ -1871,11 +1896,11 @@ body.dark-mode .table-modal-title {
 }
 .analytics-section-title {
   font-size: .8rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: .05em;
-  margin-bottom: .5rem;
+  letter-spacing: .06em;
+  margin-bottom: .6rem;
   padding-left: .25rem;
 }
 body.dark-mode .analytics-section-title {
@@ -1885,7 +1910,7 @@ body.dark-mode .analytics-section-title {
   background: #ffffff;
   border-radius: 1rem;
   padding: .85rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
   border: 1px solid rgba(226,232,240,.5);
 }
 body.dark-mode .analytics-card {
@@ -2846,7 +2871,7 @@ body.theme-playful .study-card p,
 body.theme-playful .mode-card p { color: #5a6275; }
 
 body.theme-playful .bottom-nav {
-  background: rgba(255,255,255,.95);
+  background: #faf9f7;
   border-top-color: rgba(226,222,214,.6);
   box-shadow: 0 -2px 12px rgba(120,100,70,.06);
 }
@@ -3282,7 +3307,7 @@ body.theme-playful.dark-mode .mode-card p,
 body.theme-playful.dark-mode .settings-label p { color: #8b949e; }
 
 body.theme-playful.dark-mode .bottom-nav {
-  background: rgba(13,17,23,.95);
+  background: #0d1117;
   border-top-color: rgba(255,255,255,.06);
   box-shadow: 0 -2px 12px rgba(0,0,0,.3);
 }
@@ -3852,4 +3877,45 @@ body.theme-playful.dark-mode .skip-btn {
 }
 body.theme-playful.dark-mode .skip-btn:active {
   background: rgba(255,255,255,.04);
+}
+
+/* ======== UI/UX Polish & Micro-interactions ======== */
+
+/* Task 8: Practice container centering & spacing */
+.practice-container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Task 13: Subtle card tap feedback on analytics cards */
+.analytics-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.analytics-card:active {
+  transform: scale(.985);
+}
+
+/* Task 12: Improved scroll behavior */
+.spa-view {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Task 13: Settings section card tap feedback */
+.settings-section-card {
+  transition: transform .15s ease;
+}
+
+/* Task 14: Reduced motion for view transitions */
+body.reduced-motion .spa-view-active {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spa-view-active {
+    animation: none !important;
+  }
+  .guide-animate-section {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
