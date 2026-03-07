@@ -194,15 +194,25 @@ function updateNavigationIcons(theme) {
     var view = navLinks[i].getAttribute('data-view');
     var navIcon = navLinks[i].querySelector('.nav-icon');
     if (!navIcon) continue;
+    navIcon.innerHTML = '';
 
-    if (theme === 'playful') {
-      navIcon.innerHTML = '<img src="' + _NAV_SVGS[view] + '" alt="' + view + '" width="24" height="24" draggable="false">';
+    if (theme === 'playful' && _NAV_SVGS[view]) {
+      var img = document.createElement('img');
+      img.src = _NAV_SVGS[view];
+      img.alt = '';
+      img.width = 24;
+      img.height = 24;
+      img.draggable = false;
+      navIcon.appendChild(img);
     } else {
-      navIcon.innerHTML = '<span class="nav-emoji">' + (_NAV_EMOJIS[view] || '') + '</span>';
+      var span = document.createElement('span');
+      span.className = 'nav-emoji';
+      span.textContent = _NAV_EMOJIS[view] || '';
+      navIcon.appendChild(span);
     }
 
     /* Re-attach animationend cleanup listener */
-    var iconChild = navIcon.querySelector('img') || navIcon.querySelector('.nav-emoji');
+    var iconChild = navIcon.firstChild;
     if (iconChild) {
       iconChild.addEventListener('animationend', function () {
         this.classList.remove('tab-pop');
@@ -217,8 +227,18 @@ function updateNavigationIcons(theme) {
     var h1 = viewEl.querySelector('header h1');
     if (!h1) continue;
     var info = _HEADER_LABELS[viewId];
-    if (theme === 'playful') {
-      h1.innerHTML = '<img src="' + _NAV_SVGS[info.view] + '" alt="' + info.label + '" class="header-icon" width="28" height="28" draggable="false"> ' + info.label;
+    h1.textContent = '';
+
+    if (theme === 'playful' && _NAV_SVGS[info.view]) {
+      var hImg = document.createElement('img');
+      hImg.src = _NAV_SVGS[info.view];
+      hImg.alt = '';
+      hImg.className = 'header-icon';
+      hImg.width = 28;
+      hImg.height = 28;
+      hImg.draggable = false;
+      h1.appendChild(hImg);
+      h1.appendChild(document.createTextNode(' ' + info.label));
     } else {
       h1.textContent = info.emoji + ' ' + info.label;
     }
