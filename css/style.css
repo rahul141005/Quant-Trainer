@@ -3804,14 +3804,19 @@ body.dark-mode .theme-select:focus {
   font-size: 1.25rem;
   line-height: 1;
   display: block;
-  transition: transform .2s cubic-bezier(.25,.46,.45,.94);
+  transition: transform .2s cubic-bezier(.25,.46,.45,.94), opacity .2s;
+  opacity: .55;
 }
 .bottom-nav a.active .nav-icon .nav-emoji {
   transform: scale(1.15);
+  opacity: 1;
 }
 .nav-icon .nav-emoji.tab-pop {
   animation: tab-icon-pop .25s cubic-bezier(.25,.46,.45,.94) both;
 }
+/* Dark mode emoji nav */
+body.dark-mode .bottom-nav a .nav-icon .nav-emoji { opacity: .5; }
+body.dark-mode .bottom-nav a.active .nav-icon .nav-emoji { opacity: 1; }
 
 /* ---- Skip button in drills ---- */
 .skip-btn {

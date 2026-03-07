@@ -44,6 +44,12 @@ var Router = (function () {
     }
     target.classList.add('spa-view-active');
 
+    /* Hide custom numpad on every view transition to prevent stale numpad state.
+       The drill engine will re-show it when a question is rendered. */
+    if (typeof hideCustomNumpad === 'function') {
+      hideCustomNumpad();
+    }
+
     /* Update bottom nav active state */
     var navLinks = document.querySelectorAll('.bottom-nav a');
     for (var j = 0; j < navLinks.length; j++) {
