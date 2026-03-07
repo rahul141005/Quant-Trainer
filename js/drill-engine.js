@@ -137,6 +137,24 @@ function createDrillEngine(container, opts) {
       }
     });
 
+    /* Skip button — only when skip setting is enabled and difficulty is not hard */
+    var _skipSettings = typeof loadSettings === 'function' ? loadSettings() : {};
+    if (_skipSettings.skipEnabled && _skipSettings.difficulty !== 'hard') {
+      var skipBtn = document.createElement('button');
+      skipBtn.className = 'btn skip-btn';
+      skipBtn.textContent = 'Skip →';
+      skipBtn.addEventListener('click', function () {
+        if (answered) return;
+        answered = true;
+        if (perQTimer) { clearInterval(perQTimer); perQTimer = null; }
+        /* Record skipped question as incorrect with 0 response time */
+        recordAnswer(false, q.category, q, 0);
+        nextQuestion();
+      });
+      var card = container.querySelector('.card');
+      if (card) card.appendChild(skipBtn);
+    }
+
     qStart = performance.now();
 
     /* Show custom numpad */
