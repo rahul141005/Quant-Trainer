@@ -339,17 +339,63 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 /**
- * Hide the app loading indicator.
- * Called once auth state is determined (or immediately if Firebase is not available).
+ * Run the splash screen animation sequence and remove it when finished.
+ * Stages: pause → bounce → blob emerge → amoeba expand → fill → fade out.
+ * Uses CSS classes to trigger GPU-accelerated animations.
+ * Falls back to an instant hide when reduced-motion is active.
  */
 function _hideAppLoader() {
   var loader = document.getElementById('appLoader');
-  if (loader) {
-    loader.style.opacity = '0';
-    setTimeout(function () {
-      loader.style.display = 'none';
-    }, 300);
+  if (!loader) return;
+
+  /* Reduced motion — skip animation entirely */
+  if (document.body.classList.contains('reduced-motion')) {
+    loader.style.display = 'none';
+    return;
   }
+
+  /* Stage timing constants (ms) — keep in sync with CSS animation durations.
+     Stages overlap slightly for fluid sequencing (~1.95 s total). */
+  var BOUNCE_START = 200;   /* idle → bounce          */
+  var BLOB_EMERGE  = 480;   /* blob fades in           */
+  var BLOB_EXPAND  = 880;   /* amoeba growth begins    */
+  var FILL_START   = 1380;  /* bg turns blue + emphasis */
+  var FADEOUT_START = 1650;  /* dissolve out            */
+  var REMOVE_AT    = 1950;  /* DOM cleanup             */
+
+  /* Stage 1 — brief pause is implicit: the loader is already visible
+     with a gentle idle pulse on the Q logo. */
+
+  /* Stage 2 — Q bounce (replaces idle animation via higher specificity) */
+  setTimeout(function () {
+    loader.classList.add('splash-bounce');
+  }, BOUNCE_START);
+
+  /* Stage 3 — blob emerge (overlaps with bounce tail for organic feel) */
+  setTimeout(function () {
+    loader.classList.add('splash-blob-emerge');
+  }, BLOB_EMERGE);
+
+  /* Stage 4 — amoeba expansion (CSS source order overrides emerge animation;
+     blob-emerge class stays so opacity: 1 forwards fill is not lost) */
+  setTimeout(function () {
+    loader.classList.add('splash-expand');
+  }, BLOB_EXPAND);
+
+  /* Stage 5 — full-screen blue fill + Q emphasis */
+  setTimeout(function () {
+    loader.classList.add('splash-fill');
+  }, FILL_START);
+
+  /* Stage 6 — fade out */
+  setTimeout(function () {
+    loader.classList.add('splash-fadeout');
+  }, FADEOUT_START);
+
+  /* Remove from DOM after animation completes */
+  setTimeout(function () {
+    if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+  }, REMOVE_AT);
 }
 
 /**
