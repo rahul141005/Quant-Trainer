@@ -998,11 +998,20 @@ body.dark-mode .profile-field-label {
   }
 }
 body.reduced-motion,
-body.reduced-motion * {
-  animation-duration: 0s !important;
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  animation-duration: 0.01s !important;
+  animation-delay: 0s !important;
   animation-iteration-count: 1 !important;
-  transition-duration: 0s !important;
+  transition-duration: 0.01s !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
 }
+body.reduced-motion .ripple-effect { display: none !important; }
+body.reduced-motion .floating-symbol { display: none !important; }
+body.reduced-motion .app-loader-spinner { animation: none !important; }
+body.reduced-motion .fade-in { animation: none !important; opacity: 1 !important; }
 
 /* Toggle Switch */
 .toggle {
@@ -2244,6 +2253,10 @@ body.dark-mode .clear-option-info span {
 .custom-numpad.visible {
   transform: translateY(0);
 }
+.custom-numpad:not(.visible) {
+  visibility: hidden;
+  pointer-events: none;
+}
 .numpad-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2842,7 +2855,6 @@ body.theme-playful .bottom-nav a .nav-icon img { opacity: .5; }
 body.theme-playful .bottom-nav a.active { color: #2dd4bf; }
 body.theme-playful .bottom-nav a.active .nav-icon img {
   opacity: 1;
-  filter: hue-rotate(140deg) saturate(1.4) brightness(0.85);
 }
 body.theme-playful .bottom-nav a.active::after {
   background: linear-gradient(90deg, #2dd4bf, #4f8ff7);
@@ -3279,7 +3291,6 @@ body.theme-playful.dark-mode .bottom-nav a .nav-icon img { opacity: .5; }
 body.theme-playful.dark-mode .bottom-nav a.active { color: #58a6ff; }
 body.theme-playful.dark-mode .bottom-nav a.active .nav-icon img {
   opacity: 1;
-  filter: brightness(0) saturate(100%) invert(60%) sepia(60%) saturate(600%) hue-rotate(185deg) brightness(105%);
 }
 body.theme-playful.dark-mode .bottom-nav a.active::after {
   background: linear-gradient(90deg, #58a6ff, #3ddbd9);
@@ -3786,4 +3797,54 @@ body.dark-mode .theme-select {
 body.dark-mode .theme-select:focus {
   border-color: #60a5fa;
   box-shadow: 0 0 0 3px rgba(96,165,250,.2);
+}
+
+/* ---- Emoji nav icons for Classic Blue theme ---- */
+.nav-icon .nav-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+  display: block;
+  transition: transform .2s cubic-bezier(.25,.46,.45,.94);
+}
+.bottom-nav a.active .nav-icon .nav-emoji {
+  transform: scale(1.15);
+}
+.nav-icon .nav-emoji.tab-pop {
+  animation: tab-icon-pop .25s cubic-bezier(.25,.46,.45,.94) both;
+}
+
+/* ---- Skip button in drills ---- */
+.skip-btn {
+  margin-top: .5rem;
+  background: transparent;
+  color: #64748b;
+  font-size: .85rem;
+  border: 1px solid #e2e8f0;
+  padding: .4rem 1.2rem;
+  border-radius: .5rem;
+  cursor: pointer;
+}
+.skip-btn:active {
+  background: #f1f5f9;
+}
+body.dark-mode .skip-btn {
+  color: #94a3b8;
+  border-color: #334155;
+}
+body.dark-mode .skip-btn:active {
+  background: #1e293b;
+}
+body.theme-playful .skip-btn {
+  color: #5a6275;
+  border-color: #e2ded6;
+}
+body.theme-playful .skip-btn:active {
+  background: #f0efec;
+}
+body.theme-playful.dark-mode .skip-btn {
+  color: #8b949e;
+  border-color: rgba(255,255,255,.06);
+}
+body.theme-playful.dark-mode .skip-btn:active {
+  background: rgba(255,255,255,.04);
 }

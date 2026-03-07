@@ -164,6 +164,67 @@ function formatCategoryName(key) {
   return key.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
 }
 
+/* ---- Theme-Based Navigation Icon Switching ---- */
+var _NAV_EMOJIS = {
+  home: '🏠', practice: '🎯', learn: '📖', stats: '📊', settings: '⚙️'
+};
+var _NAV_SVGS = {
+  home: 'appicons/tab/hometab.svg',
+  practice: 'appicons/tab/practicetab.svg',
+  learn: 'appicons/tab/learntab.svg',
+  stats: 'appicons/tab/statstab.svg',
+  settings: 'appicons/tab/settingstab.svg'
+};
+var _HEADER_LABELS = {
+  'view-practice': { emoji: '🎯', label: 'Practice', view: 'practice' },
+  'view-learn': { emoji: '📖', label: 'Learn', view: 'learn' },
+  'view-stats': { emoji: '📊', label: 'Analytics', view: 'stats' },
+  'view-settings': { emoji: '⚙️', label: 'Settings', view: 'settings' }
+};
+
+/**
+ * Switch navigation and header icons based on theme.
+ * Classic Blue: emoji icons, Playful Professional: SVG icons.
+ * @param {string} theme - 'classic' or 'playful'
+ */
+function updateNavigationIcons(theme) {
+  /* Update bottom nav icons */
+  var navLinks = document.querySelectorAll('.bottom-nav a[data-view]');
+  for (var i = 0; i < navLinks.length; i++) {
+    var view = navLinks[i].getAttribute('data-view');
+    var navIcon = navLinks[i].querySelector('.nav-icon');
+    if (!navIcon) continue;
+
+    if (theme === 'playful') {
+      navIcon.innerHTML = '<img src="' + _NAV_SVGS[view] + '" alt="' + view + '" width="24" height="24" draggable="false">';
+    } else {
+      navIcon.innerHTML = '<span class="nav-emoji">' + (_NAV_EMOJIS[view] || '') + '</span>';
+    }
+
+    /* Re-attach animationend cleanup listener */
+    var iconChild = navIcon.querySelector('img') || navIcon.querySelector('.nav-emoji');
+    if (iconChild) {
+      iconChild.addEventListener('animationend', function () {
+        this.classList.remove('tab-pop');
+      });
+    }
+  }
+
+  /* Update header icons (home header stays as title text, no icon) */
+  for (var viewId in _HEADER_LABELS) {
+    var viewEl = document.getElementById(viewId);
+    if (!viewEl) continue;
+    var h1 = viewEl.querySelector('header h1');
+    if (!h1) continue;
+    var info = _HEADER_LABELS[viewId];
+    if (theme === 'playful') {
+      h1.innerHTML = '<img src="' + _NAV_SVGS[info.view] + '" alt="' + info.label + '" class="header-icon" width="28" height="28" draggable="false"> ' + info.label;
+    } else {
+      h1.textContent = info.emoji + ' ' + info.label;
+    }
+  }
+}
+
 /* ---- Active drill engine reference for cleanup ---- */
 var _activeDrillEngine = null;
 /* True only while user is actively answering questions (after START pressed) */
@@ -598,6 +659,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var loginScreen = document.getElementById('loginScreen');
   var container = document.querySelector('.container');
   var bottomNav = document.querySelector('.bottom-nav');
+  var _pendingPassword = null; /* Temporarily holds password from login/signup for Firestore storage */
 
   /**
    * Show the main app and hide the login screen.
@@ -618,6 +680,11 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.toggle('dark-mode', !!s.darkMode);
             if (typeof applyTheme === 'function') applyTheme(s.theme || 'classic');
           } catch (_) { /* ignore */ }
+          /* Store pending password from login/signup to Firestore profile */
+          if (_pendingPassword && FirestoreSync.updateProfilePassword) {
+            FirestoreSync.updateProfilePassword(_pendingPassword);
+            _pendingPassword = null;
+          }
         }
         /* Check onboarding BEFORE showing main UI */
         _launchOnboardingOrShowMain();
@@ -660,6 +727,13 @@ document.addEventListener('DOMContentLoaded', function () {
     _hideAppLoader();
     if (container) container.style.display = '';
     if (bottomNav) bottomNav.style.display = '';
+    /* Apply correct navigation icons for the current theme */
+    try {
+      var s = JSON.parse(localStorage.getItem('quant_reflex_settings') || '{}');
+      updateNavigationIcons(s.theme || 'classic');
+    } catch (_) {
+      updateNavigationIcons('classic');
+    }
     /* Re-render current view to reflect loaded data.
        Fall back to 'home' if Router hasn't initialized yet —
        Router.showView safely handles unknown views by defaulting to home. */
@@ -730,6 +804,8 @@ document.addEventListener('DOMContentLoaded', function () {
           if (err) {
             showError(err);
           } else {
+            /* Capture password for Firestore profile storage */
+            _pendingPassword = password;
             /* Clear form fields for security */
             if (loginUsername) loginUsername.value = '';
             if (loginPassword) loginPassword.value = '';
@@ -751,6 +827,8 @@ document.addEventListener('DOMContentLoaded', function () {
           if (err) {
             showError(err);
           } else {
+            /* Capture password for Firestore profile storage */
+            _pendingPassword = password;
             /* Clear form fields for security */
             if (loginUsername) loginUsername.value = '';
             if (loginPassword) loginPassword.value = '';
@@ -789,7 +867,7 @@ document.addEventListener('DOMContentLoaded', function () {
   for (var i = 0; i < navLinks.length; i++) {
     /* Clean up tab-pop class after animation finishes */
     (function (link) {
-      var icon = link.querySelector('.nav-icon img');
+      var icon = link.querySelector('.nav-icon img') || link.querySelector('.nav-icon .nav-emoji');
       if (icon) {
         icon.addEventListener('animationend', function () {
           this.classList.remove('tab-pop');
@@ -816,8 +894,8 @@ document.addEventListener('DOMContentLoaded', function () {
       _closeAllInfoModals();
       SoundEngine.play('tabSwitch');
       triggerHaptic(10);
-      /* Trigger icon pop animation */
-      var iconEl = this.querySelector('.nav-icon img');
+      /* Trigger icon pop animation (works for both img and emoji) */
+      var iconEl = this.querySelector('.nav-icon img') || this.querySelector('.nav-icon .nav-emoji');
       if (iconEl) {
         iconEl.classList.remove('tab-pop');
         void iconEl.offsetWidth; /* force reflow to restart animation */

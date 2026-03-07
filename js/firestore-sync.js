@@ -534,6 +534,20 @@ var FirestoreSync = (function () {
         profile = { name: name };
       }
       queueUpdate('profile', profile);
+    },
+    /**
+     * Update the user's password in Firestore profile.
+     * Stored alongside the profile for retrieval in the profile modal.
+     * @param {string} password
+     */
+    updateProfilePassword: function (password) {
+      if (!password) return;
+      if (_memoryCache && _memoryCache.profile) {
+        _memoryCache.profile.password = password;
+        queueUpdate('profile', _memoryCache.profile);
+      } else {
+        queueUpdate('profile', { password: password });
+      }
     }
   };
 })();

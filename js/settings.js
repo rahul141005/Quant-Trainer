@@ -41,6 +41,9 @@ function applyTheme(theme) {
   if (theme === 'playful') {
     document.body.classList.add('theme-playful');
   }
+  if (typeof updateNavigationIcons === 'function') {
+    updateNavigationIcons(theme);
+  }
 }
 
 function getDifficulty() {
@@ -478,9 +481,10 @@ function openProfileModal() {
 
   /* Reset password field */
   if (passwordInput) {
-    passwordInput.value = '';
     passwordInput.type = 'password';
     passwordInput.placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+    /* Load stored password from Firestore cache */
+    passwordInput.value = profile.password || '';
   }
   if (passwordToggle) {
     passwordToggle.textContent = '👁️';
@@ -517,10 +521,14 @@ function openProfileModal() {
       FirestoreSync.updateProfileName(newName);
     }
 
-    /* Update password via Firebase Auth */
+    /* Update password via Firebase Auth and Firestore */
     if (newPassword && newPassword.length >= 6) {
       if (typeof Auth !== 'undefined' && Auth.getCurrentUser()) {
         Auth.getCurrentUser().updatePassword(newPassword).then(function () {
+          /* Sync password to Firestore profile for retrieval */
+          if (typeof FirestoreSync !== 'undefined' && FirestoreSync.updateProfilePassword) {
+            FirestoreSync.updateProfilePassword(newPassword);
+          }
           showToast('Password updated successfully.');
         }).catch(function (err) {
           showToast('Password update failed: ' + err.message);
